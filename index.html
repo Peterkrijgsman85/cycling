@@ -189,10 +189,9 @@
 </nav>
 
 <script>
-    let state = { lat: 52.09, lon: 5.12, weather: null, effort: 'med', tireStyle: 1.0, tireSurf: 1.0, logMode: 'single' };
+   let state = { lat: 52.09, lon: 5.12, weather: null, effort: 'med', tireStyle: 1.0, tireSurf: 1.0, logMode: 'single' };
 
     window.onload = () => {
-        // Setup dates
         const nu = new Date();
         document.getElementById('dateIn').valueAsDate = nu;
         document.getElementById('timeIn').value = nu.getHours().toString().padStart(2, '0') + ":00";
@@ -223,8 +222,7 @@
             const name = d.address.city || d.address.town || d.address.village || "Mijn locatie";
             const el = document.getElementById('locA');
             el.value = name;
-            el.dataset.autoname = name;
-            el.dataset.lat = lat; el.dataset.lon = lon;
+            document.getElementById('homeLocName').innerText = "📍 " + name;
         } catch(e) {}
     }
 
@@ -254,8 +252,14 @@
         el.classList.add('active');
     }
 
-    /* KLEDING LOGICA */
+    function setLogMode(el, mode) {
+        toggleBtn(el);
+        state.logMode = mode;
+        document.getElementById('routeFields').style.display = mode === 'route' ? 'block' : 'none';
+    }
+
     function setEff(el, val) { toggleBtn(el); state.effort = val; updateKit(); }
+    
     function updateKit() {
         if(!state.weather) return;
         const chillVal = parseInt(document.getElementById('chillIn').value);
@@ -265,9 +269,9 @@
         document.getElementById('kitResults').innerHTML = kit.map(k => `<div class="card" style="display:flex; align-items:center; gap:15px;"><span style="font-size:2rem;">${k.e}</span><div><b>${k.h}</b><br><small>${k.d}</small></div></div>`).join('');
     }
 
-    /* BANDEN LOGICA */
     function setTireStyle(el, f) { toggleBtn(el); state.tireStyle = f; updateTires(true); }
     function setTireSurf(el, f) { toggleBtn(el); state.tireSurf = f; updateTires(true); }
+    
     function updateTires(save) {
         const w = parseInt(document.getElementById('weightIn').value), b = parseInt(document.getElementById('brIn').value);
         document.getElementById('valW').innerText = w; document.getElementById('valB').innerText = b;
@@ -277,79 +281,54 @@
         document.getElementById('resV').innerText = (Math.max(res, 0.8) * 0.92).toFixed(1);
     }
 
-   /* VERBETERDE WEERBERICHT LOGICA */
-async function generateLog() {
-    const locAVal = document.getElementById('locA').value;
-    if (!locAVal) return alert("Vul locatie in");
-    
-    const loader = document.getElementById('logLoader');
-    loader.style.display = 'block';
-    document.getElementById('logResultArea').style.display = 'none';
-
-    try {
-        const wA = await fetchWeatherForLog(locAVal, true);
-        
-        // Windrichting voluit schrijven
-        const windDirFull = {
-            'N': 'het noorden', 'NO': 'het noordoosten', 'O': 'het oosten', 
-            'ZO': 'het zuidoosten', 'Z': 'het zuiden', 'ZW': 'het zuidwesten', 
-            'W': 'het westen', 'NW': 'het noordwesten'
-        }[wA.wd];
-
-        let r1, r2;
-
-        if (state.logMode === 'single') {
-            // Focus op de condities van het rondje
-            r1 = `${getCondIcon(wA.c)} ${wA.t}°C, ${getCondStr(wA.c).toLowerCase()}. 🌬️ Wind: ${wA.wd} ${wA.w} km/u. #RideReady`;
-            r2 = `📊 Ritverslag: Een ${getCondStr(wA.c).toLowerCase()}e rit bij ${wA.t}°C. Er stond een windje uit ${windDirFull} (${wA.w} km/u). 🚲`;
-        } else {
-            // Focus op de verplaatsing van A naar B
-            const locBVal = document.getElementById('locB').value;
-            if (!locBVal) throw new Error("Vul eindlocatie in");
-            const wB = await fetchWeatherForLog(locBVal, false);
-            
-            const windDirFinish = {
-                'N': 'het noorden', 'NO': 'het noordoosten', 'O': 'het oosten', 
-                'ZO': 'het zuidoosten', 'Z': 'het zuiden', 'ZW': 'het zuidwesten', 
-                'W': 'het westen', 'NW': 'het noordwesten'
-            }[wB.wd];
-
-            r1 = `${getCondIcon(wB.c)} ${locAVal} ➔ ${locBVal} | ${wA.t}°C ➔ ${wB.t}°C. 🌬️ Wind: ${wB.wd} ${wB.w} km/u.`;
-            r2 = `🏁 Van ${locAVal} naar ${locBVal}: Temperatuur liep van ${wA.t}°C naar ${wB.t}°C. Bij aankomst waaide het vanuit ${windDirFinish}. #CyclingLife`;
-        }
-
-        document.getElementById('res1').innerText = r1;
-        document.getElementById('res2').innerText = r2;
-        document.getElementById('logResultArea').style.display = 'block';
-    } catch(e) { 
-        alert("Fout: " + e.message); 
-    } finally {
-        loader.style.display = 'none';
-    }
-}
+    /* HELPER VOOR LOCATIE WEER */
+    async function fetchWeatherForLog(loc) {
+        const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(loc)}&count=1&language=nl&format=json`);
+        const gd = await geo.json();
+        if (!gd.results) throw new Error("Locatie niet gevonden: " + loc);
+        const { latitude: lat, longitude: lon } = gd.results[0];
+        const date = document.getElementById('dateIn').value;
+        const time = document.getElementById('timeIn').value;
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&start_date=${date}&end_date=${date}&timezone=auto`);
+        const wd = await res.json();
+        const hour = parseInt(time.split(':')[0]);
+        return {
+            t: Math.round(wd.hourly.temperature_2m[hour]),
+            c: wd.hourly.weather_code[hour],
+            w: Math.round(wd.hourly.wind_speed_10m[hour]),
+            wd: ['N','NO','O','ZO','Z','ZW','W','NW'][Math.round(wd.hourly.wind_direction_10m[hour]/45)%8]
+        };
     }
 
     async function generateLog() {
         const locAVal = document.getElementById('locA').value;
         if (!locAVal) return alert("Vul locatie in");
-        document.getElementById('logLoader').style.display = 'block';
+        const loader = document.getElementById('logLoader');
+        loader.style.display = 'block';
+        document.getElementById('logResultArea').style.display = 'none';
+
         try {
-            const wA = await fetchWeatherForLog(locAVal, true);
+            const wA = await fetchWeatherForLog(locAVal);
+            const windMap = { 'N': 'het noorden', 'NO': 'het noordoosten', 'O': 'het oosten', 'ZO': 'het zuidoosten', 'Z': 'het zuiden', 'ZW': 'het zuidwesten', 'W': 'het westen', 'NW': 'het noordwesten' };
+
             let r1, r2;
             if (state.logMode === 'single') {
-                r1 = `${getCondIcon(wA.c)} Weer: ${wA.t}°C, ${getCondStr(wA.c)}. 🌬️ Wind: ${wA.wd} ${wA.w} km/u. #RideReady`;
-                r2 = `📊 Ritverslag: Gestart in ${locAVal} bij ${wA.t}°C. Het was ${getCondStr(wA.c).toLowerCase()} met een wind uit het ${wA.wd}.`;
+                const windDirFull = windMap[wA.wd] || wA.wd;
+                r1 = `${getCondIcon(wA.c)} ${wA.t}°C, ${getCondStr(wA.c).toLowerCase()}. 🌬️ Wind: ${wA.wd} ${wA.w} km/u. #RideReady`;
+                r2 = `📊 Ritverslag: Een ${getCondStr(wA.c).toLowerCase()}e rit bij ${wA.t}°C. Er stond een windje uit ${windDirFull} (${wA.w} km/u). 🚲`;
             } else {
                 const locBVal = document.getElementById('locB').value;
-                const wB = await fetchWeatherForLog(locBVal, false);
-                r1 = `${getCondIcon(wB.c)} A➔B: ${wA.t}°C ➔ ${wB.t}°C. 🌬️ Finish: ${wB.wd} ${wB.w} km/u.`;
-                r2 = `🏁 Van ${locAVal} naar ${locBVal}: Temperatuur liep van ${wA.t}°C naar ${wB.t}°C. Finish met wind uit ${wB.wd}.`;
+                if (!locBVal) throw new Error("Vul eindlocatie in");
+                const wB = await fetchWeatherForLog(locBVal);
+                const windDirFinish = windMap[wB.wd] || wB.wd;
+                r1 = `${getCondIcon(wB.c)} ${locAVal} ➔ ${locBVal} | ${wA.t}°C ➔ ${wB.t}°C. 🌬️ Wind: ${wB.wd} ${wB.w} km/u.`;
+                r2 = `🏁 Van ${locAVal} naar ${locBVal}: Temperatuur liep van ${wA.t}°C naar ${wB.t}°C. Bij aankomst waaide het vanuit ${windDirFinish}. #CyclingLife`;
             }
             document.getElementById('res1').innerText = r1;
             document.getElementById('res2').innerText = r2;
             document.getElementById('logResultArea').style.display = 'block';
         } catch(e) { alert(e.message); }
-        document.getElementById('logLoader').style.display = 'none';
+        loader.style.display = 'none';
     }
 
     function getCondStr(c) { if(c==0) return "Onbewolkt"; if(c<=3) return "Licht bewolkt"; if(c<=67) return "Regenachtig"; return "Bewolkt"; }
