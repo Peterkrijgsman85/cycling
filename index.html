@@ -144,21 +144,153 @@
 
     <div id="v-log" class="view">
     <h1>Weerbericht</h1>
-    <span class="sub">Genereer weerdata voor je Strava of ritverslag.</span>
-    
+    <span class="sub">Genereer de perfecte weerbeschrijving voor je Strava of Komoot activiteit.</span>
+
     <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Type Rit</span>
     <div class="switch-container">
-        <div class="btn-opt active" onclick="setLogM(this, 'single')">Rondje 🔄</div>
-        <div class="btn-opt" onclick="setLogM(this, 'route')">A naar B 🏁</div>
+        <div class="btn-opt active" id="mS" onclick="setLogMode(this, 'single')">Rondje 🔄</div>
+        <div class="btn-opt" id="mR" onclick="setLogMode(this, 'route')">A naar B 🏁</div>
     </div>
 
-    <input type="text" id="logLocA" placeholder="Startlocatie (bijv. Utrecht)...">
-    <input type="text" id="logLocB" placeholder="Eindlocatie..." style="display:none;">
-    
-    <div style="display:flex; gap:10px;">
-        <input type="date" id="logDate">
-        <input type="time" id="logTime">
+    <div class="input-group">
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Locatie / Start</span>
+        <input type="text" id="locA" placeholder="Locatie bepalen... 📡">
     </div>
+
+    <div id="routeFields" style="display:none;" class="input-group">
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin: 15px 0 8px 0;">Eindlocatie</span>
+        <input type="text" id="locB" placeholder="Waar kom je aan? 📍">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+        <div><span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Datum</span><input type="date" id="dateIn"></div>
+        <div><span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Tijd</span><input type="time" id="timeIn"></div>
+    </div>
+
+    <button class="btn-generate" id="genBtn" style="background:var(--strava); color:white; border:none; width:100%; padding:16px; border-radius:16px; font-weight:800; margin-top:20px; cursor:pointer;" onclick="generateLog()">Genereer Bericht ✨</button>
+    
+    <div id="logLoader" style="display: none; text-align: center; color: var(--strava); font-weight: bold; margin-top: 15px; font-size: 0.9rem;">Data ophalen uit de cloud... ☁️</div>
+
+    <div id="logResultArea" style="margin-top: 25px; display: none;">
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Kopieer voor Strava</span>
+        
+        <div class="card" onclick="copyLog(this)" style="cursor:pointer; border:2px solid #eee; position:relative; margin-bottom: 15px; padding: 15px;">
+            <div style="position:absolute; top:-10px; left:10px; background:#eee; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:5px;">KORT & KRACHTIG ⚡</div>
+            <span id="res1" class="copy-t" style="font-size: 0.9rem; line-height: 1.4; display: block; padding-top: 5px;"></span>
+        </div>
+
+        <div class="card" onclick="copyLog(this)" style="cursor:pointer; border:2px solid #eee; position:relative; padding: 15px;">
+            <div style="position:absolute; top:-10px; left:10px; background:#eee; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:5px;">UITGEBREIDER 📝</div>
+            <span id="res2" class="copy-t" style="font-size: 0.9rem; line-height: 1.4; display: block; padding-top: 5px;"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialisatie van de Weerbericht tab
+    const locA = document.getElementById('locA');
+    const nu = new Date();
+    document.getElementById('dateIn').valueAsDate = nu;
+    document.getElementById('timeIn').value = nu.getHours().toString().padStart(2, '0') + ":00";
+
+    // GPS Locatie bij inladen
+    window.addEventListener('load', () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude, lon = pos.coords.longitude;
+                locA.dataset.lat = lat; locA.dataset.lon = lon;
+                try {
+                    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                    const d = await r.json();
+                    const name = d.address.city || d.address.town || d.address.village || "Mijn locatie";
+                    locA.value = name;
+                    locA.dataset.autoname = name;
+                } catch (e) { locA.placeholder = "Handmatig invullen..."; }
+            });
+        }
+    });
+
+    function setLogMode(el, m) {
+        toggleBtn(el);
+        state.logMode = m;
+        document.getElementById('routeFields').style.display = m === 'route' ? 'block' : 'none';
+    }
+
+    async function fetchWeatherForLog(cityInput, isStart) {
+        let lat, lon;
+        if (isStart && locA.dataset.lat && cityInput === locA.dataset.autoname) {
+            lat = locA.dataset.lat; lon = locA.dataset.lon;
+        } else {
+            const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityInput)}&count=1`);
+            const d = await r.json();
+            if (!d.results) throw new Error(`Stad "${cityInput}" niet gevonden`);
+            lat = d.results[0].latitude; lon = d.results[0].longitude;
+        }
+
+        const date = document.getElementById('dateIn').value;
+        const hour = parseInt(document.getElementById('timeIn').value.split(':')[0]);
+        const isToday = new Date(date).toDateString() === new Date().toDateString();
+        
+        const baseUrl = isToday ? "https://api.open-meteo.com/v1/forecast" : "https://archive-api.open-meteo.com/v1/archive";
+        const res = await fetch(`${baseUrl}?latitude=${lat}&longitude=${lon}&start_date=${date}&end_date=${date}&hourly=temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,relative_humidity_2m,weather_code&timezone=auto`);
+        const data = await res.json();
+
+        return {
+            t: Math.round(data.hourly.temperature_2m[hour]),
+            f: Math.round(data.hourly.apparent_temperature[hour]),
+            w: Math.round(data.hourly.wind_speed_10m[hour]),
+            h: data.hourly.relative_humidity_2m[hour],
+            c: data.hourly.weather_code[hour],
+            wdShort: ['N','NO','O','ZO','Z','ZW','W','NW'][Math.round(data.hourly.wind_direction_10m[hour] / 45) % 8],
+            wdFull: ['Noorden','Noordoosten','Oosten','Zuidoosten','Zuiden','Zuidwesten','Westen','Noordwesten'][Math.round(data.hourly.wind_direction_10m[hour] / 45) % 8]
+        };
+    }
+
+    async function generateLog() {
+        if (!locA.value) return alert("Vul een locatie in!");
+        const btn = document.getElementById('genBtn');
+        const loader = document.getElementById('logLoader');
+        
+        btn.disabled = true;
+        loader.style.display = 'block';
+        document.getElementById('logResultArea').style.display = 'none';
+
+        try {
+            const wA = await fetchWeatherForLog(locA.value, true);
+            const icon = getCondIcon(wA.c);
+            const desc = getCondStr(wA.c).toLowerCase();
+            
+            let res1, res2;
+
+            if (state.logMode === 'single') {
+                res1 = `${icon} Weerupdate: ${wA.t}°C, ${desc}. 🌬️ Wind: ${wA.wdShort} ${wA.w} km/u. #RideReady`;
+                res2 = `📊 Ritverslag: Gestart bij ${wA.t}°C onder een ${desc}e hemel. Wind kwam uit het ${wA.wdFull} (${wA.w} km/u). Gevoelstemperatuur: ${wA.f}°C. 🚲`;
+            } else {
+                const locBVal = document.getElementById('locB').value;
+                if(!locBVal) throw new Error("Vul eindlocatie in.");
+                const wB = await fetchWeatherForLog(locBVal, false);
+                res1 = `${icon} A ➔ B: ${wA.t}°C ➔ ${wB.t}°C. 🌬️ Finish-wind: ${wB.wdShort} ${wB.w} km/u.`;
+                res2 = `🏁 Van ${locA.value} naar ${locBVal}: Temperatuur liep van ${wA.t}°C op naar ${wB.t}°C. Wind bij aankomst uit het ${wB.wdFull}. #CyclingLife`;
+            }
+
+            document.getElementById('res1').innerText = res1;
+            document.getElementById('res2').innerText = res2;
+            document.getElementById('logResultArea').style.display = 'block';
+        } catch (e) {
+            alert("Fout: " + e.message);
+        } finally {
+            btn.disabled = false;
+            loader.style.display = 'none';
+        }
+    }
+
+    function copyLog(div) {
+        const text = div.querySelector('.copy-t').innerText;
+        navigator.clipboard.writeText(text);
+        div.style.borderColor = "var(--strava)";
+        setTimeout(() => div.style.borderColor = "#eee", 800);
+    }
+</script>
 
     <button style="background:var(--strava); color:white; border:none; width:100%; padding:16px; border-radius:16px; font-weight:800; margin-top:10px; cursor:pointer;" onclick="generateLog()">Genereer Bericht ✨</button>
 
