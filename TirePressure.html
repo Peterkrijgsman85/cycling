@@ -9,10 +9,10 @@
         body { font-family: -apple-system, sans-serif; background: var(--light); color: var(--dark); margin: 0; padding: 15px; display: flex; justify-content: center; }
         .card { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; }
         
-        .section-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #999; display: block; margin-bottom: 10px; }
+        .section-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #999; display: block; margin-bottom: 10px; margin-top: 5px; }
 
         /* Grid voor Ride Style */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 18px; }
         .grid-item { border: 1px solid #ddd; border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; font-size: 0.85rem; font-weight: 600; color: #666; background: white; }
         .grid-item.active { background: var(--strava); color: white; border-color: var(--strava); }
         .grid-item span { font-size: 1.2rem; }
@@ -24,17 +24,17 @@
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--strava); border: 3px solid white; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         /* Toggles */
-        .toggle-group { display: flex; gap: 8px; margin-bottom: 20px; }
-        .toggle-item { flex: 1; border: 1px solid #ddd; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: 0.2s; background: white; }
+        .toggle-group { display: flex; gap: 8px; margin-bottom: 18px; }
+        .toggle-item { flex: 1; border: 1px solid #ddd; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 0.82rem; transition: 0.2s; background: white; }
         .toggle-item.active { background: var(--strava); color: white; border-color: var(--strava); }
 
         /* Resultaten */
         .result-container { display: flex; gap: 12px; margin-top: 25px; }
         .result-box { flex: 1; background: #fdf2ee; padding: 15px; border-radius: 18px; text-align: center; border: 1px solid #feece6; }
-        .result-val { font-size: 2.2rem; font-weight: 900; color: var(--strava); display: block; }
+        .result-val { font-size: 2.2rem; font-weight: 900; color: var(--strava); display: block; line-height: 1; margin-bottom: 5px; }
         .result-unit { font-size: 0.7rem; font-weight: 800; color: #888; text-transform: uppercase; }
 
-        .footer-note { font-size: 0.7rem; color: #999; margin-top: 15px; text-align: center; line-height: 1.4; border-top: 1px solid #eee; padding-top: 10px; }
+        .footer-note { font-size: 0.7rem; color: #999; margin-top: 20px; text-align: center; line-height: 1.4; border-top: 1px solid #eee; padding-top: 10px; }
     </style>
 </head>
 <body>
@@ -51,10 +51,21 @@
         <div class="grid-item" data-factor="0.75" onclick="setStyle(this)"><span>📉</span> MTB Downhill</div>
     </div>
 
-    <span class="section-label">Surface</span>
-    <div class="toggle-group" id="surfaceToggle">
-        <div class="toggle-item active" data-mult="1.0" onclick="setSurface(this)">☀️ Dry</div>
-        <div class="toggle-item" data-mult="0.92" onclick="setSurface(this)">🌧️ Wet</div>
+    <div style="display:flex; gap: 15px;">
+        <div style="flex:1;">
+            <span class="section-label">Surface</span>
+            <div class="toggle-group" id="surfaceToggle">
+                <div class="toggle-item active" data-mult="1.0" onclick="setSurface(this)">☀️ Dry</div>
+                <div class="toggle-item" data-mult="0.92" onclick="setSurface(this)">🌧️ Wet</div>
+            </div>
+        </div>
+        <div style="flex:1;">
+            <span class="section-label">Systeem</span>
+            <div class="toggle-group" id="setupToggle">
+                <div class="toggle-item active" data-add="0" onclick="setSetup(this)">Tubeless</div>
+                <div class="toggle-item" data-add="0.35" onclick="setSetup(this)">Tube</div>
+            </div>
+        </div>
     </div>
 
     <div class="input-box">
@@ -84,13 +95,14 @@
         </div>
     </div>
 
-    <p class="footer-note">Berekening voor Tubeless/Latex. Voor binnenbanden: <b>+0.3 bar</b>.</p>
+    <p class="footer-note">Let op: Overschrijd nooit de max. druk op de band of velg (vooral bij hookless).</p>
 </div>
 
 <script>
     let currentStyleFactor = 1.0;
     let currentSurfaceMult = 1.0;
     let currentDiameterMult = 1.0;
+    let currentSetupAdd = 0;
 
     function setStyle(el) {
         document.querySelectorAll('#styleGrid .grid-item').forEach(i => i.classList.remove('active'));
@@ -103,6 +115,13 @@
         document.querySelectorAll('#surfaceToggle .toggle-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         currentSurfaceMult = parseFloat(el.dataset.mult);
+        update();
+    }
+
+    function setSetup(el) {
+        document.querySelectorAll('#setupToggle .toggle-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        currentSetupAdd = parseFloat(el.dataset.add);
         update();
     }
 
@@ -119,12 +138,19 @@
         document.getElementById('valWeight').innerText = weight;
         document.getElementById('valWidth').innerText = width;
 
+        // Basisformule
         let pressureBase = (weight / 16) * Math.pow(28 / width, 1.15);
-        let rear = pressureBase * currentStyleFactor * currentSurfaceMult * currentDiameterMult;
+        
+        // Pas Ride Style, Surface en Diameter toe
+        let rear = (pressureBase * currentStyleFactor * currentSurfaceMult * currentDiameterMult);
+        
+        // Tel de extra druk voor binnenbanden op (hogere kans op lekstoten)
+        rear += currentSetupAdd;
+        
         let front = rear * 0.92;
 
-        document.getElementById('resRear').innerText = Math.max(rear, 1.0).toFixed(1);
-        document.getElementById('resFront').innerText = Math.max(front, 0.9).toFixed(1);
+        document.getElementById('resRear').innerText = Math.max(rear, 0.8).toFixed(1);
+        document.getElementById('resFront').innerText = Math.max(front, 0.7).toFixed(1);
     }
 
     update();
