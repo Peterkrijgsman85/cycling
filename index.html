@@ -276,32 +276,56 @@
         document.getElementById('resV').innerText = (Math.max(res, 0.8) * 0.92).toFixed(1);
     }
 
-    /* WEERBERICHT LOGICA */
-    function setLogMode(el, m) { toggleBtn(el); state.logMode = m; document.getElementById('routeFields').style.display = m==='route' ? 'block' : 'none'; }
+   /* VERBETERDE WEERBERICHT LOGICA */
+async function generateLog() {
+    const locAVal = document.getElementById('locA').value;
+    if (!locAVal) return alert("Vul locatie in");
     
-    async function fetchWeatherForLog(cityInput, isStart) {
-        let lat, lon;
-        const el = document.getElementById('locA');
-        if (isStart && el.dataset.lat && cityInput === el.dataset.autoname) {
-            lat = el.dataset.lat; lon = el.dataset.lon;
+    const loader = document.getElementById('logLoader');
+    loader.style.display = 'block';
+    document.getElementById('logResultArea').style.display = 'none';
+
+    try {
+        const wA = await fetchWeatherForLog(locAVal, true);
+        
+        // Windrichting voluit schrijven
+        const windDirFull = {
+            'N': 'het noorden', 'NO': 'het noordoosten', 'O': 'het oosten', 
+            'ZO': 'het zuidoosten', 'Z': 'het zuiden', 'ZW': 'het zuidwesten', 
+            'W': 'het westen', 'NW': 'het noordwesten'
+        }[wA.wd];
+
+        let r1, r2;
+
+        if (state.logMode === 'single') {
+            // Focus op de condities van het rondje
+            r1 = `${getCondIcon(wA.c)} ${wA.t}°C, ${getCondStr(wA.c).toLowerCase()}. 🌬️ Wind: ${wA.wd} ${wA.w} km/u. #RideReady`;
+            r2 = `📊 Ritverslag: Een ${getCondStr(wA.c).toLowerCase()}e rit bij ${wA.t}°C. Er stond een windje uit ${windDirFull} (${wA.w} km/u). 🚲`;
         } else {
-            const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityInput)}&count=1`);
-            const d = await r.json();
-            if (!d.results) throw new Error("Stad niet gevonden");
-            lat = d.results[0].latitude; lon = d.results[0].longitude;
+            // Focus op de verplaatsing van A naar B
+            const locBVal = document.getElementById('locB').value;
+            if (!locBVal) throw new Error("Vul eindlocatie in");
+            const wB = await fetchWeatherForLog(locBVal, false);
+            
+            const windDirFinish = {
+                'N': 'het noorden', 'NO': 'het noordoosten', 'O': 'het oosten', 
+                'ZO': 'het zuidoosten', 'Z': 'het zuiden', 'ZW': 'het zuidwesten', 
+                'W': 'het westen', 'NW': 'het noordwesten'
+            }[wB.wd];
+
+            r1 = `${getCondIcon(wB.c)} ${locAVal} ➔ ${locBVal} | ${wA.t}°C ➔ ${wB.t}°C. 🌬️ Wind: ${wB.wd} ${wB.w} km/u.`;
+            r2 = `🏁 Van ${locAVal} naar ${locBVal}: Temperatuur liep van ${wA.t}°C naar ${wB.t}°C. Bij aankomst waaide het vanuit ${windDirFinish}. #CyclingLife`;
         }
-        const date = document.getElementById('dateIn').value;
-        const hour = parseInt(document.getElementById('timeIn').value.split(':')[0]);
-        const isToday = new Date(date).toDateString() === new Date().toDateString();
-        const baseUrl = isToday ? "https://api.open-meteo.com/v1/forecast" : "https://archive-api.open-meteo.com/v1/archive";
-        const res = await fetch(`${baseUrl}?latitude=${lat}&longitude=${lon}&start_date=${date}&end_date=${date}&hourly=temperature_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,weather_code&timezone=auto`);
-        const data = await res.json();
-        return {
-            t: Math.round(data.hourly.temperature_2m[hour]),
-            w: Math.round(data.hourly.wind_speed_10m[hour]),
-            c: data.hourly.weather_code[hour],
-            wd: ['N','NO','O','ZO','Z','ZW','W','NW'][Math.round(data.hourly.wind_direction_10m[hour] / 45) % 8]
-        };
+
+        document.getElementById('res1').innerText = r1;
+        document.getElementById('res2').innerText = r2;
+        document.getElementById('logResultArea').style.display = 'block';
+    } catch(e) { 
+        alert("Fout: " + e.message); 
+    } finally {
+        loader.style.display = 'none';
+    }
+}
     }
 
     async function generateLog() {
