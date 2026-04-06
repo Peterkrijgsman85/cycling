@@ -70,18 +70,19 @@
     
     <div id="v-home" class="view active">
         <div class="weather-widget">
-            <h1 id="greeting">Laden...</h1>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div class="temp-big" id="homeTemp">--°</div>
-                    <div id="homeCond" style="font-weight: 600;">📡 Zoeken...</div>
-                </div>
-                <div id="homeIcon" style="font-size: 4rem;">🌤️</div>
-            </div>
-            <div style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
-                🌬️ Wind: <span id="homeWind">--</span> km/u (<span id="homeDir">--</span>)
-            </div>
+    <h1 id="greeting">Laden...</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <div class="temp-big" id="homeTemp">--°</div>
+            <div id="homeCond" style="font-weight: 600;">📡 Zoeken...</div>
+            <div id="homeLocName" style="font-size: 0.8rem; opacity: 0.8; margin-top: 2px;">Locatie onbekend</div>
         </div>
+        <div id="homeIcon" style="font-size: 4rem;">🌤️</div>
+    </div>
+    <div style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
+        🌬️ Wind: <span id="homeWind">--</span> km/u (<span id="homeDir">--</span>)
+    </div>
+</div>
 
         <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); margin: 25px 0 8px 5px; display: block;">Pre-Ride Checklist</span>
         <div class="card">
