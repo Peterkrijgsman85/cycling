@@ -143,23 +143,33 @@
     </div>
 
     <div id="v-log" class="view">
-        <h1>Verslag</h1>
-        <span class="sub">Voor je Strava of Komoot post.</span>
-        <div class="switch-container">
-            <div class="btn-opt active" onclick="setLogM(this, 'single')">Rondje</div>
-            <div class="btn-opt" onclick="setLogM(this, 'route')">A naar B</div>
-        </div>
-        <input type="text" id="logLocA" placeholder="Locatie...">
-        <input type="text" id="logLocB" placeholder="Bestemming..." style="display:none;">
-        <div style="display:flex; gap:10px;"><input type="date" id="logDate"><input type="time" id="logTime"></div>
-        <button style="background:var(--strava); color:white; border:none; width:100%; padding:16px; border-radius:16px; font-weight:800; margin-top:10px;" onclick="generateLog()">Genereer Bericht ✨</button>
-        <div id="logArea" style="margin-top:20px; display:none;">
-            <div class="card" onclick="copyLog(this)" style="cursor:pointer; border:2px solid #eee; position:relative;">
-                <div style="position:absolute; top:-10px; left:10px; background:#eee; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:5px;">STRAVA</div>
-                <span id="logR1" class="copy-t"></span>
-            </div>
+    <h1>Weerbericht</h1>
+    <span class="sub">Genereer weerdata voor je Strava of ritverslag.</span>
+    
+    <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Type Rit</span>
+    <div class="switch-container">
+        <div class="btn-opt active" onclick="setLogM(this, 'single')">Rondje 🔄</div>
+        <div class="btn-opt" onclick="setLogM(this, 'route')">A naar B 🏁</div>
+    </div>
+
+    <input type="text" id="logLocA" placeholder="Startlocatie (bijv. Utrecht)...">
+    <input type="text" id="logLocB" placeholder="Eindlocatie..." style="display:none;">
+    
+    <div style="display:flex; gap:10px;">
+        <input type="date" id="logDate">
+        <input type="time" id="logTime">
+    </div>
+
+    <button style="background:var(--strava); color:white; border:none; width:100%; padding:16px; border-radius:16px; font-weight:800; margin-top:10px; cursor:pointer;" onclick="generateLog()">Genereer Bericht ✨</button>
+
+    <div id="logArea" style="margin-top:20px; display:none;">
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Kopieer voor Strava</span>
+        <div class="card" onclick="copyLog(this)" style="cursor:pointer; border:2px solid #eee; position:relative; background: #fff;">
+            <div style="position:absolute; top:-10px; left:10px; background:#eee; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:5px;">TIK OM TE KOPIËREN</div>
+            <span id="logR1" class="copy-t" style="font-size: 0.95rem; line-height: 1.4; display: block; padding-top: 5px;"></span>
         </div>
     </div>
+</div>
 
 </div>
 
