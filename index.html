@@ -23,19 +23,16 @@
         h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 5px 0; letter-spacing: -0.5px; }
         .sub { color: var(--text-sec); font-size: 0.85rem; margin-bottom: 20px; display: block; }
 
-        /* --- DASHBOARD --- */
+        /* --- WEATHER WIDGET --- */
         .weather-widget { background: linear-gradient(135deg, #fc4c02, #ff8c00); color: white; padding: 25px; border-radius: 24px; position: relative; }
         .temp-big { font-size: 3.5rem; font-weight: 900; margin: 10px 0; }
-        .checklist-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #eee; cursor: pointer; }
-        .checklist-item.checked span { text-decoration: line-through; color: var(--text-sec); }
-        .check-dot { width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 6px; }
-        .checked .check-dot { background: white; border-color: white; display: flex; align-items: center; justify-content: center; }
-        .checked .check-dot::after { content: '✓'; color: var(--strava); font-weight: 900; font-size: 14px; }
 
-        /* --- SWITCHES (GECORRIGEERD) --- */
-        .grid, .switch-container { 
+        /* --- SWITCHES (UNIFORM) --- */
+        .switch-container, .grid-switch { 
             display: flex; background: var(--switch-bg); border-radius: 14px; padding: 4px; gap: 4px; margin-bottom: 20px; 
         }
+        .grid-switch { display: grid; grid-template-columns: 1fr 1fr; }
+        
         .btn-opt { 
             flex: 1; background: transparent; border: none; padding: 12px; border-radius: 11px; 
             text-align: center; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; color: #555;
@@ -56,7 +53,13 @@
         /* --- RESULTS --- */
         .res-box { flex: 1; background: #fff5f2; border: 1px solid #ffeae3; padding: 15px; border-radius: 18px; text-align: center; }
         .res-val { font-size: 2rem; font-weight: 900; color: var(--strava); display: block; }
-        .variant { border: 2px solid #eee; border-radius: 14px; padding: 15px; margin-bottom: 10px; cursor: pointer; position: relative; background: white; }
+        
+        .checklist-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #eee; cursor: pointer; }
+        .checklist-item.checked span { text-decoration: line-through; color: var(--text-sec); }
+        .check-dot { width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 6px; }
+        .checked .check-dot { background: white; border-color: white; display: flex; align-items: center; justify-content: center; }
+        .checked .check-dot::after { content: '✓'; color: var(--strava); font-weight: 900; font-size: 14px; }
+
         input[type=text], input[type=date], input[type=time] { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 1rem; margin-bottom: 10px; }
     </style>
 </head>
@@ -83,7 +86,7 @@
         <div class="card">
             <div class="checklist-item" onclick="this.classList.toggle('checked')"><div class="check-dot"></div><span>Bidons gevuld? 💧</span></div>
             <div class="checklist-item" onclick="this.classList.toggle('checked')"><div class="check-dot"></div><span>Banden op spanning? 🚲</span></div>
-            <div class="checklist-item" onclick="this.classList.toggle('checked')"><div class="check-dot"></div><span>Route geladen? 🗺️</span></div>
+            <div class="checklist-item" onclick="this.classList.toggle('checked')"><div class="check-dot"></div><span>Helm & Bril mee? ⛑️</span></div>
         </div>
     </div>
 
@@ -93,8 +96,8 @@
         
         <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Rit Type</span>
         <div class="switch-container">
-            <div class="btn-opt active" id="eff-med" onclick="setEff(this,'med')">Toertocht 🚴‍♂️</div>
-            <div class="btn-opt" id="eff-high" onclick="setEff(this,'high')">Race / Training 🏁</div>
+            <div class="btn-opt active" onclick="setEff(this,'med')">Toertocht 🚴‍♂️</div>
+            <div class="btn-opt" onclick="setEff(this,'high')">Race / Training 🏁</div>
         </div>
 
         <div class="slider-box">
@@ -115,12 +118,12 @@
         <h1>Spanning</h1>
         <span class="sub">Optimale druk voor jouw banden.</span>
 
-        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Ondergrond</span>
-        <div class="grid">
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Type Rit</span>
+        <div class="grid-switch">
             <div class="btn-opt active" onclick="setTireStyle(this, 1.0)">Weg</div>
-            <div class="btn-opt" onclick="setTireStyle(this, 0.9)">Gravel</div>
-            <div class="btn-opt" onclick="setTireStyle(this, 0.85)">XC</div>
-            <div class="btn-opt" onclick="setTireStyle(this, 0.78)">Enduro</div>
+            <div class="btn-opt" onclick="setTireStyle(this, 0.92)">Gravel</div>
+            <div class="btn-opt" onclick="setTireStyle(this, 0.82)">MTB Trail</div>
+            <div class="btn-opt" onclick="setTireStyle(this, 0.75)">Downhill</div>
         </div>
 
         <div class="slider-box">
@@ -133,6 +136,7 @@
             <input type="range" id="brIn" min="23" max="65" value="28" oninput="updateTires(true)">
         </div>
 
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Condities</span>
         <div class="switch-container">
             <div class="btn-opt active" onclick="setTireSurf(this, 1.0)">Droog ☀️</div>
             <div class="btn-opt" onclick="setTireSurf(this, 0.92)">Nat 🌧️</div>
@@ -148,15 +152,18 @@
         <h1>Verslag</h1>
         <span class="sub">Voor je Strava of Komoot post.</span>
         <div class="switch-container">
-            <div class="btn-opt active" id="mSingle" onclick="setLogM('single')">Rondje</div>
-            <div class="btn-opt" id="mRoute" onclick="setLogM('route')">A naar B</div>
+            <div class="btn-opt active" onclick="setLogM(this, 'single')">Rondje</div>
+            <div class="btn-opt" onclick="setLogM(this, 'route')">A naar B</div>
         </div>
         <input type="text" id="logLocA" placeholder="Locatie...">
         <input type="text" id="logLocB" placeholder="Bestemming..." style="display:none;">
         <div style="display:flex; gap:10px;"><input type="date" id="logDate"><input type="time" id="logTime"></div>
         <button style="background:var(--strava); color:white; border:none; width:100%; padding:16px; border-radius:16px; font-weight:800; margin-top:10px;" onclick="generateLog()">Genereer Bericht ✨</button>
         <div id="logArea" style="margin-top:20px; display:none;">
-            <div class="variant" onclick="copyLog(this)"><div style="position:absolute; top:-10px; left:10px; background:#eee; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:5px;">STRAVA</div><span id="logR1" class="copy-t"></span></div>
+            <div class="card" onclick="copyLog(this)" style="cursor:pointer; border:2px solid #eee; position:relative;">
+                <div style="position:absolute; top:-10px; left:10px; background:#eee; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:5px;">STRAVA</div>
+                <span id="logR1" class="copy-t"></span>
+            </div>
         </div>
     </div>
 
@@ -214,10 +221,15 @@
         event.currentTarget.classList.add('active');
     }
 
-    // --- KLEDING LOGIC ---
-    function setEff(el, val) {
-        document.querySelectorAll('#v-kit .btn-opt').forEach(b => b.classList.remove('active'));
+    // --- SHARED SWITCH LOGIC ---
+    function toggleBtn(el) {
+        el.parentNode.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
+    }
+
+    // --- KLEDING ---
+    function setEff(el, val) {
+        toggleBtn(el);
         state.effort = val; updateKit();
     }
 
@@ -227,10 +239,7 @@
         const labels = ["Bikkel", "Normaal", "Koukleum"];
         document.getElementById('chillLabel').innerText = labels[chillVal];
 
-        // Bereken Gevoelstemperatuur: 
-        // Race geeft +5 graden warmte (je zweet meer). 
-        // Chill-factor past aan: Bikkel (-3), Normaal (0), Koukleum (+3)
-        let adj = (chillVal - 1) * 3;
+        let adj = (chillVal - 1) * 4;
         let effAdj = (state.effort === 'high' ? 5 : 0);
         let finalT = state.weather.apparent_temperature + effAdj - adj;
         
@@ -247,20 +256,29 @@
             </div>`).join('');
     }
 
-    // --- TIRE LOGIC ---
-    function setTireStyle(el, f) { el.parentNode.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active')); el.classList.add('active'); state.tireStyle = f; updateTires(true); }
-    function setTireSurf(el, f) { el.parentNode.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active')); el.classList.add('active'); state.tireSurf = f; updateTires(true); }
+    // --- SPANNING ---
+    function setTireStyle(el, f) { toggleBtn(el); state.tireStyle = f; updateTires(true); }
+    function setTireSurf(el, f) { toggleBtn(el); state.tireSurf = f; updateTires(true); }
+
     function updateTires(save) {
         const w = parseInt(document.getElementById('weightIn').value), b = parseInt(document.getElementById('brIn').value);
         document.getElementById('valW').innerText = w; document.getElementById('valB').innerText = b;
         if(save) { localStorage.setItem('weight', w); localStorage.setItem('width', b); }
-        let res = ((w / 16) * Math.pow(28 / b, 1.15) * state.tireStyle * state.tireSurf);
+        
+        let base = (w / 16) * Math.pow(28 / b, 1.15);
+        let res = (base * state.tireStyle * state.tireSurf);
+        
         document.getElementById('resA').innerText = Math.max(res, 0.8).toFixed(1);
         document.getElementById('resV').innerText = (Math.max(res, 0.8) * 0.92).toFixed(1);
     }
 
-    // --- LOG LOGIC ---
-    function setLogM(m) { state.logMode = m; document.getElementById('mSingle').classList.toggle('active', m==='single'); document.getElementById('mRoute').classList.toggle('active', m==='route'); document.getElementById('logLocB').style.display = m==='route' ? 'block' : 'none'; }
+    // --- VERSLAG ---
+    function setLogM(el, m) { 
+        toggleBtn(el);
+        state.logMode = m; 
+        document.getElementById('logLocB').style.display = m==='route' ? 'block' : 'none'; 
+    }
+
     async function generateLog() {
         const city = document.getElementById('logLocA').value; if(!city) return;
         const resG = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`);
@@ -274,7 +292,7 @@
 
     function getCondStr(c) { if(c==0) return "Onbewolkt"; if(c<=3) return "Licht bewolkt"; if(c<=67) return "Regenachtig"; return "Bewolkt"; }
     function getCondIcon(c) { if(c==0) return "☀️"; if(c<=3) return "🌤️"; if(c<=67) return "🌧️"; return "☁️"; }
-    function copyLog(el) { navigator.clipboard.writeText(el.querySelector('.copy-t').innerText); el.style.borderColor = "#fc4c02"; setTimeout(()=>el.style.borderColor="#eee", 1000); }
+    function copyLog(el) { navigator.clipboard.writeText(el.querySelector('.copy-t').innerText); el.style.borderColor = "#fc4c02"; setTimeout(()=>el.style.borderColor="transparent", 1000); }
 </script>
 
 </body>
