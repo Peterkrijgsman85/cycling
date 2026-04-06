@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TirePressure Pro | Cycling</title>
+    <style>
+        :root { --strava: #fc4c02; --dark: #1a1a1a; --light: #f4f4f9; }
+        body { font-family: -apple-system, sans-serif; background: var(--light); color: var(--dark); margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .card { background: white; width: 100%; max-width: 450px; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; }
+        
+        h1 { color: var(--strava); text-align: center; font-size: 1.5rem; margin-top: 0; }
+        
+        .input-group { background: #f9f9f9; padding: 15px; border-radius: 15px; margin-bottom: 12px; }
+        label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #999; display: block; margin-bottom: 8px; }
+        
+        input[type="number"], select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; font-weight: bold; box-sizing: border-box; outline: none; }
+        
+        .result-container { display: flex; gap: 15px; margin-top: 20px; }
+        .result-box { flex: 1; background: #fdf2ee; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #feece6; }
+        .result-val { font-size: 1.8rem; font-weight: 900; color: var(--strava); display: block; }
+        .result-label { font-size: 0.7rem; font-weight: bold; color: #888; text-transform: uppercase; }
+
+        .hint { font-size: 0.75rem; color: #666; font-style: italic; margin-top: 15px; text-align: center; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>🚲 TirePressure Pro</h1>
+
+    <div class="input-group">
+        <label>Totaalgewicht (Jij + Fiets) in kg</label>
+        <input type="number" id="weight" value="85" oninput="calculatePressure()">
+    </div>
+
+    <div class="input-group">
+        <label>Bandbreedte (mm)</label>
+        <select id="width" onchange="calculatePressure()">
+            <option value="23">23mm (Oldschool)</option>
+            <option value="25" selected>25mm (Standaard)</option>
+            <option value="28">28mm (Modern Comfort)</option>
+            <option value="30">30mm (All-road)</option>
+            <option value="32">32mm (Endurance)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Systeem Type</label>
+        <select id="setup" onchange="calculatePressure()">
+            <option value="tube">Binnenband (Clincher)</option>
+            <option value="tubeless" selected>Tubeless / Hookless</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Wegconditie</label>
+        <select id="road" onchange="calculatePressure()">
+            <option value="dry">Droog asfalt</option>
+            <option value="wet">Nat / Glad</option>
+            <option value="rough">Slecht wegdek / Kasseien</option>
+        </select>
+    </div>
+
+    <div class="result-container">
+        <div class="result-box">
+            <span class="result-label">Voorwiel</span>
+            <span class="result-val" id="frontBar">--</span>
+            <span class="result-label">Bar</span>
+        </div>
+        <div class="result-box">
+            <span class="result-label">Achterwiel</span>
+            <span class="result-val" id="rearBar">--</span>
+            <span class="result-label">Bar</span>
+        </div>
+    </div>
+
+    <p class="hint" id="warningText">Let op: Overschrijd nooit de maximale druk die op je velg of band staat!</p>
+</div>
+
+<script>
+    function calculatePressure() {
+        const weight = parseFloat(document.getElementById('weight').value);
+        const width = parseInt(document.getElementById('width').value);
+        const setup = document.getElementById('setup').value;
+        const road = document.getElementById('road').value;
+
+        if (!weight || weight < 30) return;
+
+        // Basisformule (versimpeld Silca/SRAM algoritme)
+        // Druk neemt af naarmate breedte toeneemt
+        // Factor bepaalt de stijfheid van de curve
+        let baseFactor = 0;
+        if (width === 23) baseFactor = 0.085;
+        if (width === 25) baseFactor = 0.072;
+        if (width === 28) baseFactor = 0.060;
+        if (width === 30) baseFactor = 0.052;
+        if (width === 32) baseFactor = 0.046;
+
+        let pressureRear = weight * baseFactor;
+        
+        // Aanpassing voor Tubeless (-12%)
+        if (setup === 'tubeless') {
+            pressureRear *= 0.88;
+        }
+
+        // Aanpassing voor wegcondities
+        if (road === 'wet') pressureRear -= 0.5;
+        if (road === 'rough') pressureRear -= 0.8;
+
+        // Voorwiel is meestal 5% tot 7% zachter vanwege gewichtsverdeling
+        let pressureFront = pressureRear * 0.94;
+
+        // Limieten (niet te zacht, niet te hard voor de berekening)
+        pressureRear = Math.max(Math.min(pressureRear, 9.0), 2.5);
+        pressureFront = Math.max(Math.min(pressureFront, 8.5), 2.3);
+
+        document.getElementById('frontBar').innerText = pressureFront.toFixed(1);
+        document.getElementById('rearBar').innerText = pressureRear.toFixed(1);
+        
+        // Specifieke waarschuwing voor hookless velgen (max 5.0 bar)
+        if (setup === 'tubeless' && (pressureRear > 5.0 || pressureFront > 5.0)) {
+            document.getElementById('warningText').innerHTML = "⚠️ Let op: Gebruik je <b>Hookless</b> velgen? Pomp dan nooit harder dan 5.0 bar!";
+            document.getElementById('warningText').style.color = "red";
+        } else {
+            document.getElementById('warningText').innerHTML = "Let op: Overschrijd nooit de maximale druk die op je velg of band staat!";
+            document.getElementById('warningText').style.color = "#666";
+        }
+    }
+
+    // Start de berekening direct
+    window.onload = calculatePressure;
+</script>
+
+</body>
+</html>
