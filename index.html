@@ -14,7 +14,6 @@
             display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* Container voor de schermen */
         #app-container {
             flex: 1; overflow-y: auto;
             padding: 20px 15px 100px 15px;
@@ -25,11 +24,10 @@
         .view.active { display: block; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Algemene Kaart Styling */
         .card { background: white; width: 100%; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h1 { color: var(--strava); text-align: center; font-size: 1.5rem; margin-top: 0; margin-bottom: 15px; letter-spacing: -0.5px; }
-        .desc { text-align: center; font-size: 0.85rem; color: #666; margin-bottom: 20px; margin-top: -10px; }
-        .section-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #999; display: block; margin-bottom: 8px; margin-top: 5px; }
+        h1 { color: var(--strava); text-align: center; font-size: 1.5rem; margin-top: 0; margin-bottom: 5px; letter-spacing: -0.5px; }
+        .desc { text-align: center; font-size: 0.85rem; color: #666; margin-bottom: 20px; }
+        .section-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #999; display: block; margin-bottom: 8px; margin-top: 10px; }
         .input-box { background: #f9f9f9; padding: 15px; border-radius: 15px; margin-bottom: 12px; }
         
         input[type="text"], input[type="date"], input[type="time"] { 
@@ -45,41 +43,40 @@
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: var(--gray); text-decoration: none; font-size: 0.6rem; font-weight: 700; width: 33%; cursor: pointer;
+            color: var(--gray); text-decoration: none; font-size: 0.65rem; font-weight: 700; width: 33%; cursor: pointer;
         }
         .nav-item.active { color: var(--strava); }
         .nav-item span { font-size: 1.5rem; margin-bottom: 4px; }
 
-        /* --- BUTTONS & SWITCHES --- */
-        .btn-group, .switcher { display: flex; background: #eee; border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 15px; }
-        .btn, .sw-btn { 
+        /* --- UI ELEMENTEN --- */
+        .toggle-group, .btn-group, .switcher { display: flex; background: #eee; border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 10px; }
+        .toggle-item, .btn, .sw-btn { 
             flex: 1; border: none; padding: 10px; border-radius: 9px; cursor: pointer; 
-            font-weight: bold; background: none; transition: 0.2s; font-size: 0.85rem; color: #555;
+            font-weight: bold; background: none; transition: 0.2s; font-size: 0.82rem; color: #555; text-align: center;
         }
-        .btn.active, .sw-btn.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--strava); }
+        .toggle-item.active, .btn.active, .sw-btn.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--strava); }
         
-        .btn-main { 
-            background: var(--strava); color: white; border: none; padding: 16px; 
-            width: 100%; border-radius: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 10px;
-        }
-
-        /* --- TIRE SPECIFIC --- */
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
-        .grid-item { border: 1px solid #ddd; border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; background: white; }
+        .grid-item { border: 1px solid #ddd; border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; background: white; color: #666; }
         .grid-item.active { background: var(--strava); color: white; border-color: var(--strava); }
-        .slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 5px; background: #ddd; margin: 10px 0; }
+        .grid-item span { font-size: 1.2rem; }
+
+        .slider-header { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; align-items: center; }
+        .slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 5px; background: #ddd; margin: 10px 0; outline: none; }
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--strava); border: 3px solid white; cursor: pointer; }
 
-        /* --- WEATHER LOG SPECIFIC --- */
+        .info-icon { display: inline-block; width: 14px; height: 14px; background: #ccc; color: white; border-radius: 50%; text-align: center; font-size: 10px; line-height: 14px; cursor: pointer; margin-left: 5px; }
+        .info-text { display: none; background: #333; color: white; font-size: 0.7rem; padding: 10px; border-radius: 8px; margin-top: 5px; font-weight: normal; line-height: 1.3; }
+
+        .result-container { display: flex; gap: 12px; margin-top: 20px; }
+        .result-box { flex: 1; background: #fdf2ee; padding: 15px; border-radius: 18px; text-align: center; border: 1px solid #feece6; }
+        .result-val { font-size: 2.2rem; font-weight: 900; color: var(--strava); display: block; line-height: 1; margin-bottom: 5px; }
+        .result-unit { font-size: 0.7rem; font-weight: 800; color: #888; text-transform: uppercase; }
+
+        /* Weather Log Variants */
         .variant { background: #fff; border: 2px solid #eee; padding: 15px; border-radius: 15px; margin-bottom: 10px; cursor: pointer; position: relative; }
         .variant-tag { position: absolute; top: -10px; left: 12px; background: #eee; color: #666; font-size: 0.6rem; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
         .copy-text { font-size: 0.9rem; line-height: 1.4; color: #222; display: block; }
-        
-        /* Kit List */
-        .kit-item { display: flex; align-items: center; background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 12px; margin-bottom: 8px; }
-        .kit-emoji { font-size: 1.4rem; margin-right: 12px; }
-        .kit-text b { display: block; font-size: 0.85rem; }
-        .kit-text span { font-size: 0.75rem; color: #666; }
     </style>
 </head>
 <body>
@@ -89,31 +86,26 @@
     <div id="view-kit" class="view active">
         <div class="card">
             <h1>👕 KitSelect Pro</h1>
-            <p class="desc">Wat moet ik aan vandaag?</p>
+            <p class="desc">Kledingadvies op basis van het weer.</p>
             <div class="input-box">
-                <input type="text" id="cityInput" placeholder="Locatie zoeken..." onkeypress="if(event.key === 'Enter') updateManualLocation()">
+                <input type="text" id="cityInput" placeholder="Stad zoeken..." onkeypress="if(event.key === 'Enter') updateManualLocation()">
             </div>
-
             <div id="weatherLoader" style="text-align:center; color:var(--strava);">Laden... 🛰️</div>
-
             <div id="kitContent" style="display:none;">
                 <div class="input-box" style="text-align:center; background:#fdf2ee; border:1px solid #feece6;">
                     <div id="weatherIcon" style="font-size: 2rem;">☀️</div>
                     <div style="font-size: 2rem; font-weight: 900;" id="liveTemp">--°C</div>
                     <span id="liveFeels" style="font-size:0.8rem; font-weight:bold; color:#666;">--</span>
                 </div>
-
                 <span class="section-label">Type Rit</span>
                 <div class="btn-group">
-                    <button class="btn active" id="effMed" onclick="setEffort('med')">🚴‍♂️ Toertocht</button>
-                    <button class="btn" id="effHigh" onclick="setEffort('high')">🏁 Race</button>
+                    <button class="btn active" id="effMed" onclick="setEffort('med')">Toertocht</button>
+                    <button class="btn" id="effHigh" onclick="setEffort('high')">Training/Race</button>
                 </div>
-
                 <div class="input-box">
                     <label class="section-label">Kou-Gevoeligheid</label>
                     <input type="range" min="-3" max="3" value="0" class="slider" id="chillFactor" oninput="getKitAdvice()">
                 </div>
-
                 <div id="kitList"></div>
             </div>
         </div>
@@ -122,50 +114,59 @@
     <div id="view-tire" class="view">
         <div class="card">
             <h1>🚲 TirePressure Pro</h1>
-            <p class="desc">De ideale spanning voor jouw rit.</p>
+            <p class="desc">Bereken de ideale bandenspanning.</p>
             
             <span class="section-label">Ride Style</span>
-            <div class="grid">
-                <div class="grid-item active" data-factor="1.0" onclick="setStyle(this, 1.0)"><span>🚲</span> Road</div>
-                <div class="grid-item" data-factor="0.9" onclick="setStyle(this, 0.9)"><span>🏜️</span> Gravel</div>
-                <div class="grid-item" data-factor="0.85" onclick="setStyle(this, 0.85)"><span>🌲</span> XC</div>
-                <div class="grid-item" data-factor="0.78" onclick="setStyle(this, 0.78)"><span>📉</span> DH</div>
+            <div class="grid" id="styleGrid">
+                <div class="grid-item active" data-factor="1.0" onclick="setStyle(this)"><span>🚲</span> Road</div>
+                <div class="grid-item" data-factor="0.95" onclick="setStyle(this)"><span>🚵</span> CX</div>
+                <div class="grid-item" data-factor="0.90" onclick="setStyle(this)"><span>🏜️</span> Gravel</div>
+                <div class="grid-item" data-factor="0.85" onclick="setStyle(this)"><span>🌲</span> MTB XC</div>
+                <div class="grid-item" data-factor="0.82" onclick="setStyle(this)"><span>⛰️</span> Trail</div>
+                <div class="grid-item" data-factor="0.78" onclick="setStyle(this)"><span>🏁</span> Enduro</div>
+                <div class="grid-item" data-factor="0.75" onclick="setStyle(this)"><span>📉</span> Downhill</div>
             </div>
 
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap: 15px;">
                 <div style="flex:1;">
-                    <span class="section-label">Ondergrond</span>
-                    <div class="switcher">
-                        <div class="sw-btn active" onclick="setTireOption(this, 'surf', 1.0)">☀️</div>
-                        <div class="sw-btn" onclick="setTireOption(this, 'surf', 0.92)">🌧️</div>
+                    <span class="section-label">Surface</span>
+                    <div class="toggle-group" id="surfaceToggle">
+                        <div class="toggle-item active" data-mult="1.0" onclick="setSurface(this)">☀️ Dry</div>
+                        <div class="toggle-item" data-mult="0.92" onclick="setSurface(this)">🌧️ Wet</div>
                     </div>
                 </div>
                 <div style="flex:1;">
                     <span class="section-label">Systeem</span>
-                    <div class="switcher">
-                        <div class="sw-btn active" onclick="setTireOption(this, 'sys', 0)">TL</div>
-                        <div class="sw-btn" onclick="setTireOption(this, 'sys', 0.35)">Tube</div>
+                    <div class="toggle-group" id="setupToggle">
+                        <div class="toggle-item active" data-add="0" onclick="setSetup(this)">TL</div>
+                        <div class="toggle-item" data-add="0.35" onclick="setSetup(this)">Tube</div>
                     </div>
                 </div>
             </div>
 
             <div class="input-box">
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:bold;">
-                    Systeemgewicht <span><span id="valWeight">85</span> kg</span>
+                <div class="slider-header">
+                    <div>Systeemgewicht <span class="info-icon" onclick="toggleTireInfo()">i</span></div>
+                    <span><span id="valWeight">85</span> kg</span>
                 </div>
-                <input type="range" id="weight" min="40" max="130" value="85" class="slider" oninput="updateTires()">
+                <div id="infoBox" class="info-text">Totaal: Jij + Kleding + Fiets + Bagage.</div>
+                <input type="range" id="weight" min="40" max="140" value="85" class="slider" oninput="updateTires()">
             </div>
 
             <div class="input-box">
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:bold;">
-                    Bandbreedte <span><span id="valWidth">28</span> mm</span>
-                </div>
-                <input type="range" id="width" min="23" max="60" value="28" class="slider" oninput="updateTires()">
+                <div class="slider-header">Bandbreedte <span><span id="valWidth">28</span> mm</span></div>
+                <input type="range" id="width" min="23" max="65" value="28" class="slider" oninput="updateTires()">
+            </div>
+
+            <span class="section-label">Wieldiameter</span>
+            <div class="toggle-group" id="diameterToggle">
+                <div class="toggle-item active" data-mult="1.0" onclick="setDiameter(this)">700c / 29"</div>
+                <div class="toggle-item" data-mult="1.05" onclick="setDiameter(this)">650b / 27.5"</div>
             </div>
 
             <div class="result-container">
-                <div class="result-box"><span class="result-val" id="resFront">--</span><span class="result-unit">Bar (V)</span></div>
-                <div class="result-box"><span class="result-val" id="resRear">--</span><span class="result-unit">Bar (A)</span></div>
+                <div class="result-box"><span class="result-val" id="resFront">--</span><span class="result-unit">Bar (Voor)</span></div>
+                <div class="result-box"><span class="result-val" id="resRear">--</span><span class="result-unit">Bar (Achter)</span></div>
             </div>
         </div>
     </div>
@@ -174,30 +175,15 @@
         <div class="card">
             <h1>✍️ Weather Log</h1>
             <p class="desc">Voor je Strava of Komoot activiteit.</p>
-
             <div class="switcher">
                 <button class="sw-btn active" id="mS" onclick="setLogMode('single')">Rondje 🔄</button>
                 <button class="sw-btn" id="mR" onclick="setLogMode('route')">A naar B 🏁</button>
             </div>
-
-            <div class="input-group">
-                <label class="section-label">Locatie / Start</label>
-                <input type="text" id="locA" placeholder="Locatie...">
-            </div>
-
-            <div id="routeFields" style="display:none;" class="input-group">
-                <label class="section-label">Eindlocatie</label>
-                <input type="text" id="locB" placeholder="Bestemming...">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px;">
-                <input type="date" id="dateIn">
-                <input type="time" id="timeIn">
-            </div>
-
-            <button class="btn-main" id="genBtn" onclick="generateLog()">Genereer Bericht ✨</button>
-            <div id="logLoader" style="display:none; text-align:center; color:var(--strava); margin-top:10px;">Data ophalen... ☁️</div>
-
+            <div class="input-group"><label class="section-label">Locatie / Start</label><input type="text" id="locA" placeholder="Locatie..."></div>
+            <div id="routeFields" style="display:none;" class="input-group"><label class="section-label">Eindlocatie</label><input type="text" id="locB" placeholder="Bestemming..."></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px;"><input type="date" id="dateIn"><input type="time" id="timeIn"></div>
+            <button class="btn-main" style="background:var(--strava); color:white; border:none; padding:16px; width:100%; border-radius:15px; font-weight:bold; margin-top:15px;" onclick="generateLog()">Genereer Bericht ✨</button>
+            <div id="logLoader" style="display:none; text-align:center; color:var(--strava); margin-top:10px;">Laden...</div>
             <div id="logResults" style="display:none; margin-top:20px;">
                 <div class="variant" onclick="copyLog(this)"><div class="variant-tag">KORT</div><span class="copy-text" id="res1"></span></div>
                 <div class="variant" onclick="copyLog(this)"><div class="variant-tag">UITGEBREID</div><span class="copy-text" id="res2"></span></div>
@@ -207,13 +193,13 @@
 </div>
 
 <nav>
-    <div class="nav-item active" id="nav-kit" onclick="switchView('kit')"><span>👕</span>Kit</div>
+    <div class="nav-item active" id="nav-kit" onclick="switchView('kit')"><span>👕</span>Kleding</div>
     <div class="nav-item" id="nav-tire" onclick="switchView('tire')"><span>🚲</span>Banden</div>
     <div class="nav-item" id="nav-log" onclick="switchView('log')"><span>✍️</span>Log</div>
 </nav>
 
 <script>
-    // --- NAV & GLOBAL ---
+    // --- NAVIGATION ---
     function switchView(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -221,38 +207,40 @@
         document.getElementById('nav-'+id).classList.add('active');
     }
 
-    // --- TAB 1: KIT LOGIC ---
+    // --- TAB 1: KITSELECT ---
     let effort = 'med', liveW = null;
     window.onload = () => {
         const nu = new Date();
         document.getElementById('dateIn').valueAsDate = nu;
         document.getElementById('timeIn').value = nu.getHours().toString().padStart(2, '0') + ":00";
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => fetchWeather(pos.coords.latitude, pos.coords.longitude), () => fetchWeather(52.09, 5.12));
+            navigator.geolocation.getCurrentPosition(pos => fetchInitialWeather(pos.coords.latitude, pos.coords.longitude), () => fetchInitialWeather(52.09, 5.12));
         }
         updateTires();
     };
 
-    async function fetchWeather(lat, lon) {
-        const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-        const gData = await geo.json();
-        const city = gData.address.city || gData.address.town || "Mijn Locatie";
-        document.getElementById('cityInput').value = city;
-        document.getElementById('locA').value = city;
-        document.getElementById('locA').dataset.lat = lat; document.getElementById('locA').dataset.lon = lon;
-        document.getElementById('locA').dataset.autoname = city;
+    async function fetchInitialWeather(lat, lon) {
+        try {
+            const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            const gData = await geo.json();
+            const city = gData.address.city || gData.address.town || "Mijn Locatie";
+            document.getElementById('cityInput').value = city;
+            document.getElementById('locA').value = city;
+            document.getElementById('locA').dataset.lat = lat; document.getElementById('locA').dataset.lon = lon;
+            document.getElementById('locA').dataset.autoname = city;
 
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&timezone=auto`);
-        const d = await res.json();
-        liveW = { t: Math.round(d.current.temperature_2m), f: Math.round(d.current.apparent_temperature), c: d.current.weather_code };
-        document.getElementById('weatherLoader').style.display = 'none';
-        document.getElementById('kitContent').style.display = 'block';
-        updateKitUI();
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code&timezone=auto`);
+            const d = await res.json();
+            liveW = { t: Math.round(d.current.temperature_2m), f: Math.round(d.current.apparent_temperature), c: d.current.weather_code };
+            document.getElementById('weatherLoader').style.display = 'none';
+            document.getElementById('kitContent').style.display = 'block';
+            updateKitUI();
+        } catch(e) {}
     }
 
     function updateKitUI() {
         document.getElementById('liveTemp').innerText = liveW.t + "°C";
-        document.getElementById('liveFeels').innerText = "Voelt als " + liveW.f + "°C";
+        document.getElementById('liveFeels').innerText = "Gevoelstemp: " + liveW.f + "°C";
         document.getElementById('weatherIcon').innerText = liveW.c <= 3 ? "☀️" : (liveW.c <= 67 ? "🌧️" : "☁️");
         getKitAdvice();
     }
@@ -261,70 +249,71 @@
 
     function getKitAdvice() {
         if(!liveW) return;
-        let dTemp = liveW.f + (effort === 'high' ? 4 : 0) - (parseInt(document.getElementById('chillFactor').value) * 2);
+        let dTemp = liveW.f + (effort === 'high' ? 4 : 0) - (parseInt(document.getElementById('chillFactor').value) * 2.5);
         let kit = [];
-        if (dTemp < 7) { kit.push({e:"🧥",h:"Winterjack",d:"Thermo jack + lange broek"}); kit.push({e:"🧤",h:"Winterset",d:"Warme handschoenen & overschoenen"}); }
-        else if (dTemp < 15) { kit.push({e:"👕",h:"Lange mouwen",d:"Of korte mouwen met armstukken"}); kit.push({e:"🩳",h:"Kort + kniestukken",d:"Bescherm je knieën tegen de wind"}); }
-        else { kit.push({e:"☀️",h:"Zomerkit",d:"Korte mouwen en korte broek"}); }
-        document.getElementById('kitList').innerHTML = kit.map(i => `<div class="kit-item"><div class="kit-emoji">${i.e}</div><div class="kit-text"><b>${i.h}</b><span>${i.d}</span></div></div>`).join('');
+        if (dTemp < 6) kit.push({e:"🧥",h:"Winterjack",d:"Dikke thermo-laag"},{e:"🧤",h:"Winterset",d:"Handschoenen & overschoenen"});
+        else if (dTemp < 12) kit.push({e:"🧥",h:"Lange Mouwen",d:"Winddicht jack/jersey"},{e:"👖",h:"Lange Broek",d:"Gevoerde tight"});
+        else if (dTemp < 17) kit.push({e:"👕",h:"Armstukken",d:"Kort shirt + armstukken"},{e:"🩳",h:"Kniestukken",d:"Bescherm je gewrichten"});
+        else kit.push({e:"☀️",h:"Zomerkit",d:"Korte mouwen en broek"});
+        document.getElementById('kitList').innerHTML = kit.map(i => `<div class="kit-item" style="display:flex; align-items:center; background:#f9f9f9; padding:12px; border-radius:12px; margin-bottom:8px;"><div style="font-size:1.5rem; margin-right:12px;">${i.e}</div><div><b style="display:block; font-size:0.85rem;">${i.h}</b><span style="font-size:0.75rem; color:#666;">${i.d}</span></div></div>`).join('');
     }
 
-    // --- TAB 2: TIRE LOGIC ---
-    let tFac = 1.0, tSurf = 1.0, tSys = 0;
-    function setStyle(el, f) { document.querySelectorAll('#view-tire .grid-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); tFac = f; updateTires(); }
-    function setTireOption(el, type, v) { 
-        el.parentNode.querySelectorAll('.sw-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active');
-        if(type==='surf') tSurf = v; else tSys = v; updateTires(); 
-    }
+    // --- TAB 2: TIREPRESSURE LOGIC (RECOV) ---
+    let tStyle = 1.0, tSurf = 1.0, tSys = 0, tDiam = 1.0;
+
+    function setStyle(el) { document.querySelectorAll('#styleGrid .grid-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); tStyle = parseFloat(el.dataset.factor); updateTires(); }
+    function setSurface(el) { document.querySelectorAll('#surfaceToggle .toggle-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); tSurf = parseFloat(el.dataset.mult); updateTires(); }
+    function setSetup(el) { document.querySelectorAll('#setupToggle .toggle-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); tSys = parseFloat(el.dataset.add); updateTires(); }
+    function setDiameter(el) { document.querySelectorAll('#diameterToggle .toggle-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); tDiam = parseFloat(el.dataset.mult); updateTires(); }
+    function toggleTireInfo() { const b = document.getElementById('infoBox'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; }
+
     function updateTires() {
         const w = parseInt(document.getElementById('weight').value);
         const br = parseInt(document.getElementById('width').value);
         document.getElementById('valWeight').innerText = w; document.getElementById('valWidth').innerText = br;
-        let res = ((w / 16) * Math.pow(28 / br, 1.15) * tFac * tSurf) + tSys;
-        document.getElementById('resRear').innerText = res.toFixed(1);
-        document.getElementById('resFront').innerText = (res * 0.92).toFixed(1);
+        
+        let base = (w / 16) * Math.pow(28 / br, 1.15);
+        let res = (base * tStyle * tSurf * tDiam) + tSys;
+        
+        document.getElementById('resRear').innerText = Math.max(res, 0.8).toFixed(1);
+        document.getElementById('resFront').innerText = (Math.max(res, 0.8) * 0.92).toFixed(1);
     }
 
     // --- TAB 3: LOG LOGIC ---
     let logMode = 'single';
     function setLogMode(m) { logMode = m; document.getElementById('mS').classList.toggle('active', m==='single'); document.getElementById('mR').classList.toggle('active', m==='route'); document.getElementById('routeFields').style.display = m==='route'?'block':'none'; }
     
-    async function fetchWeatherForLog(city, isStart) {
-        let lat, lon;
-        const locA = document.getElementById('locA');
-        if(isStart && locA.dataset.lat && city === locA.dataset.autoname) { lat = locA.dataset.lat; lon = locA.dataset.lon; }
-        else {
-            const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`);
-            const d = await r.json(); lat = d.results[0].latitude; lon = d.results[0].longitude;
-        }
-        const date = document.getElementById('dateIn').value;
-        const hour = parseInt(document.getElementById('timeIn').value.split(':')[0]);
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&start_date=${date}&end_date=${date}&hourly=temperature_2m,wind_speed_10m,weather_code&timezone=auto`);
-        const data = await res.json();
-        return { t: Math.round(data.hourly.temperature_2m[hour]), w: Math.round(data.hourly.wind_speed_10m[hour]), c: data.hourly.weather_code[hour] };
-    }
-
     async function generateLog() {
-        const btn = document.getElementById('genBtn'); btn.disabled = true;
         document.getElementById('logLoader').style.display = 'block';
         try {
-            const wA = await fetchWeatherForLog(document.getElementById('locA').value, true);
-            const icon = wA.c <= 3 ? "☀️" : "☁️";
+            const locA = document.getElementById('locA').value;
+            const wA = await fetchWeatherForLog(locA, true);
             let r1, r2;
             if(logMode === 'single') {
-                r1 = `${icon} Weer: ${wA.t}°C. 🌬️ Wind: ${wA.w} km/u.`;
-                r2 = `📊 Rit-statistiek: ${wA.t}°C met een windje van ${wA.w} km/u. Prima fietsweer!`;
+                r1 = `☀️ Weerupdate: ${wA.t}°C. 💨 Wind: ${wA.w} km/u.`;
+                r2 = `📊 De omstandigheden in ${locA}: Het was ${wA.t}°C met een windje van ${wA.w} km/u. Heerlijk gereden!`;
             } else {
                 const wB = await fetchWeatherForLog(document.getElementById('locB').value, false);
-                r1 = `${icon} A naar B: ${wA.t}°C ➔ ${wB.t}°C.`;
-                r2 = `🏁 Van start naar finish: Begonnen bij ${wA.t}°C, geëindigd bij ${wB.t}°C.`;
+                r1 = `🏁 Ritupdate: ${wA.t}°C ➔ ${wB.t}°C.`;
+                r2 = `📊 Van ${locA} naar ${document.getElementById('locB').value}: Gestart bij ${wA.t}°C en gefinisht bij ${wB.t}°C.`;
             }
             document.getElementById('res1').innerText = r1; document.getElementById('res2').innerText = r2;
             document.getElementById('logResults').style.display = 'block';
         } catch(e) { alert("Locatie niet gevonden"); }
-        btn.disabled = false; document.getElementById('logLoader').style.display = 'none';
+        document.getElementById('logLoader').style.display = 'none';
     }
-    function copyLog(el) { navigator.clipboard.writeText(el.querySelector('.copy-text').innerText); el.style.borderColor = "#fc4c02"; setTimeout(()=>el.style.borderColor="#eee", 1000); }
+
+    async function fetchWeatherForLog(city, isStart) {
+        const rGeoc = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`);
+        const dGeoc = await rGeoc.json();
+        const lat = dGeoc.results[0].latitude, lon = dGeoc.results[0].longitude;
+        const date = document.getElementById('dateIn').value;
+        const hour = parseInt(document.getElementById('timeIn').value.split(':')[0]);
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&start_date=${date}&end_date=${date}&hourly=temperature_2m,wind_speed_10m&timezone=auto`);
+        const d = await res.json();
+        return { t: Math.round(d.hourly.temperature_2m[hour]), w: Math.round(d.hourly.wind_speed_10m[hour]) };
+    }
+    function copyLog(el) { navigator.clipboard.writeText(el.querySelector('.copy-text').innerText); el.style.borderColor = "#fc4c02"; setTimeout(()=>el.style.borderColor="#eee", 800); }
 </script>
 
 </body>
