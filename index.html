@@ -157,10 +157,10 @@
 
     <div id="v-water" class="view">
     <h1>Drinkwater</h1>
-    <span class="sub">Dichtstbijzijnde RIVM drinkwaterpunten in de buurt.</span>
+    <span class="sub">Dichtstbijzijnde RIVM drinkwaterpunten.</span>
 
     <div id="waterLoader" class="card" style="text-align:center;">
-        Waterpunten inladen... 💧
+        Punten ophalen... 💧
     </div>
 
     <div id="waterList"></div>
@@ -368,32 +368,39 @@
         const loader = document.getElementById('waterLoader');
         const list = document.getElementById('waterList');
         try {
-            // URL van jouw eigen JSON bestand op GitHub
+            // De RAW URL is cruciaal voor een werkende fetch vanaf GitHub
             const url = 'https://raw.githubusercontent.com/Peterkrijgsman85/cycling/main/drinkwaterpunten-rivm.json';
             const res = await fetch(url);
-            if (!res.ok) throw new Error("Bestand niet bereikbaar");
+            if (!res.ok) throw new Error("Kon JSON niet ophalen van GitHub");
+            
             const data = await res.json();
 
-            // Normaliseer data en bereken afstand
-            const normalized = data.map(p => {
-                const lat = parseFloat(p.lat || p.Latitude);
-                const lon = parseFloat(p.lon || p.Longitude);
+            // Soms is de data een array, soms een object met een 'features' key (GeoJSON)
+            const pointsArray = Array.isArray(data) ? data : (data.features || []);
+
+            const normalized = pointsArray.map(p => {
+                // Check of de coördinaten in p zelf staan of in p.properties (GeoJSON)
+                const item = p.properties ? p.properties : p;
+                
+                // Ondersteuning voor verschillende naamgevingen (lat/lon of Latitude/Longitude)
+                const lat = parseFloat(item.lat || item.Latitude || item.latitude || (p.geometry ? p.geometry.coordinates[1] : 0));
+                const lon = parseFloat(item.lon || item.Longitude || item.longitude || (p.geometry ? p.geometry.coordinates[0] : 0));
+                
                 return {
-                    name: p.naam || p.Name || p.locatie || "RIVM Tappunt",
+                    name: item.naam || item.Name || item.locatie || "RIVM Tappunt",
                     lat: lat,
                     lon: lon,
                     distance: calcDistance(state.lat, state.lon, lat, lon)
                 };
-            });
+            }).filter(p => p.lat !== 0); // Verwijder punten zonder geldige coördinaten
 
-            // Sorteren op afstand (dichtstbijzijnde eerst)
             normalized.sort((a, b) => a.distance - b.distance);
             const nearest = normalized.slice(0, 15);
 
             loader.style.display = 'none';
 
             if (nearest.length === 0) {
-                list.innerHTML = '<div class="card">Geen waterpunten gevonden in de lijst. 🏜️</div>';
+                list.innerHTML = '<div class="card">Geen waterpunten gevonden. 🏜️</div>';
                 return;
             }
 
@@ -401,28 +408,20 @@
                 <div class="card">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
                         <div>
-                            <div style="font-weight:800; font-size:1rem;">
-                                💧 ${p.name}
-                            </div>
-                            <div class="water-distance">
-                                ${p.distance.toFixed(1)} km afstand
-                            </div>
-                            <div class="water-tag">
-                                RIVM Drinkwaterpunt
-                            </div>
+                            <div style="font-weight:800; font-size:1rem;">💧 ${p.name}</div>
+                            <div class="water-distance">${p.distance.toFixed(1)} km afstand</div>
+                            <div class="water-tag">RIVM Drinkwaterpunt</div>
                         </div>
                     </div>
                     <div class="water-actions">
-                        <a class="water-btn" href="https://www.google.com/maps?q=${p.lat},${p.lon}" target="_blank">
-                            Open in Maps
-                        </a>
+                        <a class="water-btn" href="https://www.google.com/maps?q=${p.lat},${p.lon}" target="_blank">Open in Maps</a>
                     </div>
                 </div>
             `).join('');
 
         } catch(e) {
             console.error(e);
-            loader.innerHTML = 'Kon RIVM data niet laden 😕';
+            loader.innerHTML = 'Fout bij laden RIVM data 😕';
         }
     }
 
