@@ -68,6 +68,11 @@
 
         .res-box { flex: 1; background: #fff5f2; border: 1px solid #ffeae3; padding: 15px; border-radius: 18px; text-align: center; }
         .res-val { font-size: 2rem; font-weight: 900; color: var(--strava); display: block; }
+
+        .water-distance { font-size: 0.8rem; color: var(--text-sec); margin-top: 4px; }
+        .water-actions { display: flex; gap: 10px; margin-top: 12px; }
+        .water-btn { flex: 1; text-align: center; background: var(--strava); color: white; text-decoration: none; padding: 12px; border-radius: 14px; font-size: 0.85rem; font-weight: 700; }
+        .water-tag { display: inline-block; background: #fff5f2; color: var(--strava); font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 999px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -150,6 +155,17 @@
         </div>
     </div>
 
+    <div id="v-water" class="view">
+    <h1>Drinkwater</h1>
+    <span class="sub">Dichtstbijzijnde drinkwaterpunten in jouw buurt.</span>
+
+    <div id="waterLoader" class="card" style="text-align:center;">
+        Waterpunten laden... 💧
+    </div>
+
+    <div id="waterList"></div>
+    </div>
+
     <div id="v-log" class="view">
         <h1>Weerbericht</h1>
         <span class="sub">Genereer data voor je Strava of Komoot verslag.</span>
@@ -191,6 +207,7 @@
     <div class="nav-item active" onclick="tab('home')"><i>🏠</i>Overzicht</div>
     <div class="nav-item" onclick="tab('kit')"><i>👕</i>Kleding</div>
     <div class="nav-item" onclick="tab('tire')"><i>🚲</i>Spanning</div>
+    <div class="nav-item" onclick="tab('water')"><i>💧</i>Drinkwater</div>
     <div class="nav-item" onclick="tab('log')"><i>🌤️</i>Weerbericht</div>
 </nav>
 
@@ -217,8 +234,11 @@
                 state.lat = p.coords.latitude; state.lon = p.coords.longitude; 
                 fetchWeather();
                 reverseGeocode(p.coords.latitude, p.coords.longitude);
+                loadWaterPoints();
             }, () => fetchWeather());
-        } else { fetchWeather(); }
+                loadWaterPoints();
+        } else { fetchWeather();
+               loadWaterPoints();}
     }
 
     async function reverseGeocode(lat, lon) {
@@ -340,6 +360,73 @@
     function getCondStr(c) { if(c==0) return "Onbewolkt"; if(c<=3) return "Licht bewolkt"; if(c<=67) return "Regenachtig"; return "Bewolkt"; }
     function getCondIcon(c) { if(c==0) return "☀️"; if(c<=3) return "🌤️"; if(c<=67) return "🌧️"; return "☁️"; }
     function copyLog(el) { navigator.clipboard.writeText(el.querySelector('.copy-t').innerText); el.style.borderColor = "#fc4c02"; setTimeout(()=>el.style.borderColor="#eee", 1000); }
+
+    async function loadWaterPoints() {
+                name,
+                distance
+            };
+        });
+
+        normalized.sort((a, b) => a.distance - b.distance);
+
+        const nearest = normalized.slice(0, 15);
+
+        loader.style.display = 'none';
+
+        list.innerHTML = nearest.map(p => `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                    <div>
+                        <div style="font-weight:800; font-size:1rem;">
+                            💧 ${p.name}
+                        </div>
+
+                        <div class="water-distance">
+                            ${p.distance.toFixed(1)} km afstand
+                        </div>
+
+                        <div class="water-tag">
+                            RIVM Drinkwaterpunt
+                        </div>
+                    </div>
+                </div>
+
+                <div class="water-actions">
+                    <a
+                        class="water-btn"
+                        href="https://www.google.com/maps?q=${p.lat},${p.lon}"
+                        target="_blank"
+                    >
+                        Open in Maps
+                    </a>
+                </div>
+            </div>
+        `).join('');
+
+    } catch(e) {
+        console.error(e);
+
+        loader.innerHTML = 'Kon drinkwaterpunten niet laden 😕';
+    }
+}
+
+function calcDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+}
 </script>
 
 </body>
