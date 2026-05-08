@@ -161,15 +161,33 @@
     </div>
 
     <div id="v-fuel" class="view">
-        <h1>Voeding</h1>
-        <span class="sub">Plan je energie voor de rit.</span>
-        
-        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Intensiteit</span>
-        <div class="switch-container">
-            <div class="btn-opt active" onclick="setFuelInt(this, 30)">Rustig ☕</div>
-            <div class="btn-opt" onclick="setFuelInt(this, 60)">Stevig 🔥</div>
-            <div class="btn-opt" onclick="setFuelInt(this, 90)">Volgas 🏁</div>
-        </div>
+    <h1>Voeding</h1>
+    <span class="sub">Plan je energie voor de rit.</span>
+    
+    <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Type Rit</span>
+    <div class="switch-container">
+        <!-- We gebruiken nu 40g voor Toertocht en 80g voor Training als gemiddelden -->
+        <div class="btn-opt active" onclick="setFuelInt(this, 40)">Toertocht 🗺️</div>
+        <div class="btn-opt" onclick="setFuelInt(this, 80)">Training ⚡</div>
+    </div>
+
+    <div class="slider-box">
+        <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">Geplande duur <span><b id="valDur">2.0</b> uur</span></div>
+        <input type="range" id="durIn" min="0.5" max="8" step="0.5" value="2" oninput="updateFuel()">
+    </div>
+
+    <div style="display:flex; gap:12px;">
+        <div class="res-box"><span class="res-val" id="resCarbs">--</span><span style="font-size:0.7rem; font-weight:800; color:#888;">TOTAAL GRAM KH</span></div>
+        <div class="res-box"><span class="res-val" id="resBottles">--</span><span style="font-size:0.7rem; font-weight:800; color:#888;">BIDONS (500ML)</span></div>
+    </div>
+
+    <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin: 20px 0 8px 5px;">Benodigde voorraad (Kies 1 optie)</span>
+    <div class="card">
+        <ul class="fuel-list" id="fuelBreakdown">
+            <!-- Wordt gevuld door JS -->
+        </ul>
+    </div>
+</div>
 
         <div class="slider-box">
             <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">Geplande duur <span><b id="valDur">2.0</b> uur</span></div>
@@ -349,21 +367,23 @@
 
     /* FUEL LOGIC */
     function setFuelInt(el, val) { toggleBtn(el); state.fuelInt = val; updateFuel(); }
-    function updateFuel() {
+function updateFuel() {
         const dur = parseFloat(document.getElementById('durIn').value);
         document.getElementById('valDur').innerText = dur.toFixed(1);
         const totalCarbs = Math.round(dur * state.fuelInt);
-        const bottles = Math.ceil(dur); // 1 fles per uur
+        const bottles = Math.ceil(dur); 
         
         document.getElementById('resCarbs').innerText = totalCarbs;
         document.getElementById('resBottles').innerText = bottles;
 
-        // Berekening per item
+        // Berekening per item inclusief de banaan
+        const bananen = Math.ceil(totalCarbs / 25);
         const krent = Math.ceil(totalCarbs / 20);
         const repen = Math.ceil(totalCarbs / 30);
         const gels = Math.ceil(totalCarbs / 25);
 
         document.getElementById('fuelBreakdown').innerHTML = `
+            <li><span>🍌 Bananen (±25g KH)</span> <b>${bananen} stuks</b></li>
             <li><span>🍞 Krentenbollen (±20g KH)</span> <b>${krent} stuks</b></li>
             <li><span>🍫 Energierepen (±30g KH)</span> <b>${repen} stuks</b></li>
             <li><span>🧪 Gels (±25g KH)</span> <b>${gels} stuks</b></li>
