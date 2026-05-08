@@ -73,6 +73,11 @@
         .water-actions { display: flex; gap: 10px; margin-top: 12px; }
         .water-btn { flex: 1; text-align: center; background: var(--strava); color: white; text-decoration: none; padding: 12px; border-radius: 14px; font-size: 0.85rem; font-weight: 700; }
         .water-tag { display: inline-block; background: #fff5f2; color: var(--strava); font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 999px; margin-top: 10px; }
+        
+        /* Fuel specifics */
+        .fuel-list { list-style: none; padding: 0; margin: 15px 0 0 0; }
+        .fuel-list li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        .fuel-list li:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -155,7 +160,6 @@
         </div>
     </div>
 
-    <!-- NIEUWE SECTIE: VOEDING -->
     <div id="v-fuel" class="view">
         <h1>Voeding</h1>
         <span class="sub">Plan je energie voor de rit.</span>
@@ -172,13 +176,16 @@
             <input type="range" id="durIn" min="0.5" max="8" step="0.5" value="2" oninput="updateFuel()">
         </div>
 
-        <div style="display:flex; gap:12px; margin-top:20px;">
+        <div style="display:flex; gap:12px;">
             <div class="res-box"><span class="res-val" id="resCarbs">--</span><span style="font-size:0.7rem; font-weight:800; color:#888;">TOTAAL GRAM KH</span></div>
             <div class="res-box"><span class="res-val" id="resBottles">--</span><span style="font-size:0.7rem; font-weight:800; color:#888;">BIDONS (500ML)</span></div>
         </div>
-        
-        <div class="card" style="margin-top:20px; font-size:0.85rem; line-height:1.5;">
-            <b>Tip:</b> Probeer elke 20 minuten iets te eten of te drinken om je voorraad op peil te houden.
+
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin: 20px 0 8px 5px;">Benodigde voorraad (Kies 1 optie)</span>
+        <div class="card">
+            <ul class="fuel-list" id="fuelBreakdown">
+                <!-- Wordt gevuld door JS -->
+            </ul>
         </div>
     </div>
 
@@ -340,15 +347,27 @@
         document.getElementById('resV').innerText = (Math.max(res, 0.8) * 0.92).toFixed(1);
     }
 
-    /* NIEUWE FUNCTIES: VOEDING */
+    /* FUEL LOGIC */
     function setFuelInt(el, val) { toggleBtn(el); state.fuelInt = val; updateFuel(); }
     function updateFuel() {
         const dur = parseFloat(document.getElementById('durIn').value);
         document.getElementById('valDur').innerText = dur.toFixed(1);
         const totalCarbs = Math.round(dur * state.fuelInt);
-        const bottles = Math.ceil((dur * 500) / 500); // Simpele aanname: 1 bidon per uur
+        const bottles = Math.ceil(dur); // 1 fles per uur
+        
         document.getElementById('resCarbs').innerText = totalCarbs;
         document.getElementById('resBottles').innerText = bottles;
+
+        // Berekening per item
+        const krent = Math.ceil(totalCarbs / 20);
+        const repen = Math.ceil(totalCarbs / 30);
+        const gels = Math.ceil(totalCarbs / 25);
+
+        document.getElementById('fuelBreakdown').innerHTML = `
+            <li><span>🍞 Krentenbollen (±20g KH)</span> <b>${krent} stuks</b></li>
+            <li><span>🍫 Energierepen (±30g KH)</span> <b>${repen} stuks</b></li>
+            <li><span>🧪 Gels (±25g KH)</span> <b>${gels} stuks</b></li>
+        `;
     }
 
     async function fetchWeatherForLog(loc) {
