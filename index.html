@@ -354,13 +354,13 @@
 
         if (totalCarbs > 0) {
             const bananen = Math.ceil(totalCarbs / 25);
-            const krent = Math.ceil(totalCarbs / 20);
+            const krent = Math.ceil(totalCarbs / 25);
             const repen = Math.ceil(totalCarbs / 30);
             const gels = Math.ceil(totalCarbs / 25);
 
             document.getElementById('fuelBreakdown').innerHTML = `
                 <li><span>🍌 Bananen (±25g KH)</span> <b>${bananen} stuks</b></li>
-                <li><span>🍞 Krentenbollen (±20g KH)</span> <b>${krent} stuks</b></li>
+                <li><span>🍞 Krentenbollen (±25g KH)</span> <b>${krent} stuks</b></li>
                 <li><span>🍫 Energierepen (±30g KH)</span> <b>${repen} stuks</b></li>
                 <li><span>🧪 Gels (±25g KH)</span> <b>${gels} stuks</b></li>
             `;
