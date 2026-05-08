@@ -264,12 +264,16 @@
 
     async function reverseGeocode(lat, lon) {
         try {
-            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`, {
+                headers: { 'User-Agent': 'RideReadyApp' }
+            });
             const d = await r.json();
-            const name = d.address.city || d.address.town || d.address.village || "Mijn locatie";
+            const name = d.address.city || d.address.town || d.address.village || d.address.suburb || "Mijn locatie";
             document.getElementById('locA').value = name;
             document.getElementById('homeLocName').innerText = "📍 " + name;
-        } catch(e) {}
+        } catch(e) {
+            document.getElementById('homeLocName').innerText = "📍 Locatie bepaald";
+        }
     }
 
     async function fetchWeather() {
@@ -338,11 +342,9 @@
             totalCarbs = 0;
             adviceText = "Ritten onder de 60 min. kunnen prima op je eigen reserves. Geen extra voeding nodig!";
         } else if (dur <= 2.0) {
-            // Eerste uur niks, daarna 30g per uur
             totalCarbs = Math.round((dur - 1) * 30);
             adviceText = "Start pas na 45-60 min. met eten. Richt op 30g koolhydraten per uur.";
         } else {
-            // Eerste uur niks, uur 1 tot 2 is 30g, daarna 40g
             totalCarbs = 30 + Math.round((dur - 2) * 40);
             adviceText = "Start na een uur. Schakel na 2 uur over naar 40g koolhydraten per uur voor de langere duur.";
         }
