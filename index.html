@@ -58,8 +58,8 @@
         .checked .check-dot { background: var(--strava); border-color: var(--strava); display: flex; align-items: center; justify-content: center; }
         .checked .check-dot::after { content: '✓'; color: white; font-weight: 900; font-size: 14px; }
 
-        .res-box { flex: 1; background: #fff5f2; border: 1px solid #ffeae3; padding: 15px; border-radius: 18px; text-align: center; }
-        .res-val { font-size: 1.8rem; font-weight: 900; color: var(--strava); display: block; }
+        .res-box { flex: 1; background: #fff5f2; border: 1px solid #ffeae3; padding: 15px; border-radius: 18px; text-align: center; min-height: 80px; display: flex; flex-direction: column; justify-content: center; }
+        .res-val { font-size: 1.6rem; font-weight: 900; color: var(--strava); display: block; }
 
         .water-distance { font-size: 0.8rem; color: var(--text-sec); margin-top: 4px; }
         .water-actions { display: flex; gap: 10px; margin-top: 12px; }
@@ -157,13 +157,7 @@
     <!-- FUEL -->
     <div id="v-fuel" class="view">
         <h1>Voeding</h1>
-        <span class="sub">Plan je energie voor de rit.</span>
-        
-        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Type Rit</span>
-        <div class="switch-container">
-            <div class="btn-opt active" onclick="setFuelInt(this, 40)">Toertocht 🗺️</div>
-            <div class="btn-opt" onclick="setFuelInt(this, 80)">Training ⚡</div>
-        </div>
+        <span class="sub">Wanneer en hoeveel moet je eten?</span>
 
         <div class="slider-box">
             <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">Geplande duur <span><b id="valDur">2.0</b> uur</span></div>
@@ -173,6 +167,10 @@
         <div style="display:flex; gap:12px;">
             <div class="res-box"><span class="res-val" id="resCarbs">--</span><span style="font-size:0.7rem; font-weight:800; color:#888;">GRAM KH</span></div>
             <div class="res-box"><span class="res-val" id="resBottles">--</span><span style="font-size:0.7rem; font-weight:800; color:#888;">BIDONS (500ML)</span></div>
+        </div>
+
+        <div id="fuelAdvice" class="card" style="margin-top: 10px; background: #fffaf0; border: 1px solid #ffe4b5; font-size: 0.9rem; font-style: italic; color: #856404;">
+            <!-- Advies tekst komt hier -->
         </div>
 
         <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin: 20px 0 8px 5px;">Benodigde voorraad (Kies 1 optie)</span>
@@ -230,7 +228,7 @@
 </nav>
 
 <script>
-    let state = { lat: 52.09, lon: 5.12, weather: null, effort: 'med', tireStyle: 1.0, tireSurf: 1.0, logMode: 'single', fuelInt: 40 };
+    let state = { lat: 52.09, lon: 5.12, weather: null, effort: 'med', tireStyle: 1.0, tireSurf: 1.0, logMode: 'single' };
 
     window.onload = () => {
         const nu = new Date();
@@ -329,27 +327,46 @@
         document.getElementById('resV').innerText = (Math.max(res, 0.8) * 0.92).toFixed(1);
     }
 
-    function setFuelInt(el, val) { toggleBtn(el); state.fuelInt = val; updateFuel(); }
     function updateFuel() {
         const dur = parseFloat(document.getElementById('durIn').value);
         document.getElementById('valDur').innerText = dur.toFixed(1);
-        const totalCarbs = Math.round(dur * state.fuelInt);
-        const bottles = Math.ceil(dur); 
         
+        let totalCarbs = 0;
+        let adviceText = "";
+
+        if (dur <= 1.0) {
+            totalCarbs = 0;
+            adviceText = "Ritten onder de 60 min. kunnen prima op je eigen reserves. Geen extra voeding nodig!";
+        } else if (dur <= 2.0) {
+            // Eerste uur niks, daarna 30g per uur
+            totalCarbs = Math.round((dur - 1) * 30);
+            adviceText = "Start pas na 45-60 min. met eten. Richt op 30g koolhydraten per uur.";
+        } else {
+            // Eerste uur niks, uur 1 tot 2 is 30g, daarna 40g
+            totalCarbs = 30 + Math.round((dur - 2) * 40);
+            adviceText = "Start na een uur. Schakel na 2 uur over naar 40g koolhydraten per uur voor de langere duur.";
+        }
+
+        const bottles = Math.ceil(dur); 
         document.getElementById('resCarbs').innerText = totalCarbs;
         document.getElementById('resBottles').innerText = bottles;
+        document.getElementById('fuelAdvice').innerText = adviceText;
 
-        const bananen = Math.ceil(totalCarbs / 25);
-        const krent = Math.ceil(totalCarbs / 20);
-        const repen = Math.ceil(totalCarbs / 30);
-        const gels = Math.ceil(totalCarbs / 25);
+        if (totalCarbs > 0) {
+            const bananen = Math.ceil(totalCarbs / 25);
+            const krent = Math.ceil(totalCarbs / 20);
+            const repen = Math.ceil(totalCarbs / 30);
+            const gels = Math.ceil(totalCarbs / 25);
 
-        document.getElementById('fuelBreakdown').innerHTML = `
-            <li><span>🍌 Bananen (±25g KH)</span> <b>${bananen} stuks</b></li>
-            <li><span>🍞 Krentenbollen (±20g KH)</span> <b>${krent} stuks</b></li>
-            <li><span>🍫 Energierepen (±30g KH)</span> <b>${repen} stuks</b></li>
-            <li><span>🧪 Gels (±25g KH)</span> <b>${gels} stuks</b></li>
-        `;
+            document.getElementById('fuelBreakdown').innerHTML = `
+                <li><span>🍌 Bananen (±25g KH)</span> <b>${bananen} stuks</b></li>
+                <li><span>🍞 Krentenbollen (±20g KH)</span> <b>${krent} stuks</b></li>
+                <li><span>🍫 Energierepen (±30g KH)</span> <b>${repen} stuks</b></li>
+                <li><span>🧪 Gels (±25g KH)</span> <b>${gels} stuks</b></li>
+            `;
+        } else {
+            document.getElementById('fuelBreakdown').innerHTML = `<li><span>Geen extra voeding nodig voor deze duur.</span></li>`;
+        }
     }
 
     async function fetchWeatherForLog(loc) {
