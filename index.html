@@ -5,102 +5,149 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RideReady | Jouw Fietsmaatje</title>
     <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
-    <meta name="mobile-web-app-capable" content="yes">
+
+<link rel="apple-touch-icon" href="logo.png">
+
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="shortcut icon" sizes="192x192" href="logo.png">
     <style>
         :root { --strava: #fc4c02; --dark: #121212; --bg: #f2f2f7; --card: #ffffff; --text-main: #1c1c1e; --text-sec: #8e8e93; --switch-bg: #e3e3e8; }
+        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; 
+            background: var(--bg); color: var(--text-main); margin: 0; padding: 0;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
         #app-scroller { flex: 1; overflow-y: auto; padding: 20px 16px 120px 16px; }
         .view { display: none; width: 100%; max-width: 500px; margin: 0 auto; }
         .view.active { display: block; animation: slideUp 0.3s cubic-bezier(0.1, 0.7, 1.0, 0.1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
         .card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.03); }
         h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 5px 0; letter-spacing: -0.5px; }
         .sub { color: var(--text-sec); font-size: 0.85rem; margin-bottom: 20px; display: block; }
+
+        /* --- WEATHER WIDGET --- */
         .weather-widget { background: linear-gradient(135deg, #fc4c02, #ff8c00); color: white; padding: 25px; border-radius: 24px; position: relative; }
         .temp-big { font-size: 3.5rem; font-weight: 900; margin: 10px 0; }
-        .switch-container, .grid-switch { display: flex; background: var(--switch-bg); border-radius: 14px; padding: 4px; gap: 4px; margin-bottom: 20px; }
+
+        /* --- SWITCHES --- */
+        .switch-container, .grid-switch { 
+            display: flex; background: var(--switch-bg); border-radius: 14px; padding: 4px; gap: 4px; margin-bottom: 20px; 
+        }
         .grid-switch { display: grid; grid-template-columns: 1fr 1fr; }
-        .btn-opt { flex: 1; background: transparent; border: none; padding: 12px; border-radius: 11px; text-align: center; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; color: #555; }
+        
+        .btn-opt { 
+            flex: 1; background: transparent; border: none; padding: 12px; border-radius: 11px; 
+            text-align: center; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s; color: #555;
+        }
         .btn-opt.active { background: white; color: var(--strava); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        
+        /* --- SLIDERS & INPUTS --- */
         .slider-box { background: #f9f9f9; padding: 15px; border-radius: 16px; margin-bottom: 15px; }
         input[type=range] { -webkit-appearance: none; width: 100%; height: 8px; background: #ddd; border-radius: 10px; outline: none; margin: 15px 0; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; background: white; border: 3px solid var(--strava); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         input[type=text], input[type=date], input[type=time] { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 1rem; margin-bottom: 10px; outline: none; }
+        input:focus { border-color: var(--strava); }
+
+        /* --- NAV --- */
         nav { position: fixed; bottom: 0; left: 0; right: 0; height: 90px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border-top: 1px solid #ddd; display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 1000; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sec); font-size: 0.6rem; font-weight: 700; width: 20%; cursor: pointer; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sec); font-size: 0.6rem; font-weight: 700; width: calc(100% / 6); cursor: pointer; }
         .nav-item.active { color: var(--strava); }
-        .nav-item i { font-size: 1.4rem; margin-bottom: 4px; font-style: normal; }
+        .nav-item i { font-size: 1.3rem; margin-bottom: 4px; font-style: normal; }
+
+        /* --- CHECKLIST --- */
         .checklist-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #eee; cursor: pointer; }
+        .checklist-item:last-child { border-bottom: none; }
+        .checklist-item.checked span { text-decoration: line-through; color: var(--text-sec); }
+        .check-dot { width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 6px; flex-shrink: 0; }
         .checked .check-dot { background: var(--strava); border-color: var(--strava); display: flex; align-items: center; justify-content: center; }
         .checked .check-dot::after { content: '✓'; color: white; font-weight: 900; font-size: 14px; }
-        .check-dot { width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 6px; flex-shrink: 0; }
+
         .res-box { flex: 1; background: #fff5f2; border: 1px solid #ffeae3; padding: 15px; border-radius: 18px; text-align: center; }
         .res-val { font-size: 2rem; font-weight: 900; color: var(--strava); display: block; }
-        .fuel-card { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #f9f9f9; border-radius: 14px; margin-bottom: 8px; border-left: 4px solid var(--strava); }
-        .fuel-qty { font-weight: 900; font-size: 1.1rem; color: var(--strava); }
+
+        .water-distance { font-size: 0.8rem; color: var(--text-sec); margin-top: 4px; }
+        .water-actions { display: flex; gap: 10px; margin-top: 12px; }
+        .water-btn { flex: 1; text-align: center; background: var(--strava); color: white; text-decoration: none; padding: 12px; border-radius: 14px; font-size: 0.85rem; font-weight: 700; }
+        .water-tag { display: inline-block; background: #fff5f2; color: var(--strava); font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 999px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div id="app-scroller">
-    <!-- HOME -->
+    
     <div id="v-home" class="view active">
         <div class="weather-widget">
-            <h1 id="greeting">Laden...</h1>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div class="temp-big" id="homeTemp">--°</div>
-                    <div id="homeCond" style="font-weight: 600;">📡 Zoeken...</div>
-                    <div id="homeLocName" style="font-size: 0.8rem; opacity: 0.8; margin-top: 2px;">Locatie onbekend</div>
-                </div>
-                <div id="homeIcon" style="font-size: 4rem;">🌤️</div>
-            </div>
-            <div style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
-                🌬️ Wind: <span id="homeWind">--</span> km/u (<span id="homeDir">--</span>)
-            </div>
+    <h1 id="greeting">Laden...</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <div class="temp-big" id="homeTemp">--°</div>
+            <div id="homeCond" style="font-weight: 600;">📡 Zoeken...</div>
+            <div id="homeLocName" style="font-size: 0.8rem; opacity: 0.8; margin-top: 2px;">Locatie onbekend</div>
         </div>
+        <div id="homeIcon" style="font-size: 4rem;">🌤️</div>
+    </div>
+    <div style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
+        🌬️ Wind: <span id="homeWind">--</span> km/u (<span id="homeDir">--</span>)
+    </div>
+</div>
+
         <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); margin: 25px 0 8px 5px; display: block;">Pre-Ride Checklist</span>
         <div class="card">
             <div class="checklist-item" onclick="this.classList.toggle('checked')"><div class="check-dot"></div><span>Banden op spanning? 🚲</span></div>
             <div class="checklist-item" onclick="this.classList.toggle('checked')"><div class="check-dot"></div><span>Bidon & Voeding mee? 💧🔋</span></div>
             <div class="checklist-item" onclick="this.classList.toggle('checked')"><div class="check-dot"></div><span>Helm & Bril? ⛑️</span></div>
+            <div class="checklist-item" onclick="this.classList.toggle('checked')"><div class="check-dot"></div><span>Lichten & Computer vol? 🔋</span></div>
+            <div class="checklist-item" onclick="this.classList.toggle('checked')"><div class="check-dot"></div><span>Pechsetje & Multitool? 🛠️</span></div>
         </div>
     </div>
 
-    <!-- KLEDING -->
     <div id="v-kit" class="view">
         <h1>Kleding</h1>
         <span class="sub">Wat trekken we aan vandaag?</span>
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Rit Type</span>
         <div class="switch-container">
             <div class="btn-opt active" onclick="setEff(this,'med')">Toertocht 🚴‍♂️</div>
             <div class="btn-opt" onclick="setEff(this,'high')">Race / Training 🏁</div>
         </div>
         <div class="slider-box">
-            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">Type fietser: <span id="chillLabel" style="color:var(--strava);">Normaal</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
+                <span>Type fietser:</span>
+                <span id="chillLabel" style="color:var(--strava);">Normaal</span>
+            </div>
             <input type="range" min="0" max="2" value="1" id="chillIn" oninput="updateKit()">
+            <div style="display:flex; justify-content:space-between; font-size:0.7rem; font-weight:bold; color:#aaa;">
+                <span>BIKKEL</span><span>NORMAAL</span><span>KOUKLEUM</span>
+            </div>
         </div>
         <div id="kitResults"></div>
     </div>
 
-    <!-- SPANNING -->
     <div id="v-tire" class="view">
         <h1>Spanning</h1>
         <span class="sub">Optimale druk voor jouw banden.</span>
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Type Rit</span>
         <div class="grid-switch">
             <div class="btn-opt active" onclick="setTireStyle(this, 1.0)">🚲 Weg</div>
             <div class="btn-opt" onclick="setTireStyle(this, 0.92)">🏜️ Gravel</div>
-            <div class="btn-opt" onclick="setTireStyle(this, 0.82)">🌲 MTB</div>
-            <div class="btn-opt" onclick="setTireStyle(this, 0.75)">📉 DH</div>
+            <div class="btn-opt" onclick="setTireStyle(this, 0.82)">🌲 MTB Trail</div>
+            <div class="btn-opt" onclick="setTireStyle(this, 0.75)">📉 Downhill</div>
         </div>
         <div class="slider-box">
-            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">Gewicht <span><b id="valW">85</b> kg</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">Systeemgewicht <span><b id="valW">85</b> kg</span></div>
             <input type="range" id="weightIn" min="40" max="140" value="85" oninput="updateTires(true)">
         </div>
         <div class="slider-box">
-            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">Breedte <span><b id="valB">28</b> mm</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">Bandbreedte <span><b id="valB">28</b> mm</span></div>
             <input type="range" id="brIn" min="23" max="65" value="28" oninput="updateTires(true)">
+        </div>
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Condities</span>
+        <div class="switch-container">
+            <div class="btn-opt active" onclick="setTireSurf(this, 1.0)">☀️ Droog</div>
+            <div class="btn-opt" onclick="setTireSurf(this, 0.92)">🌧️ Nat</div>
         </div>
         <div style="display:flex; gap:12px;">
             <div class="res-box"><span class="res-val" id="resV">--</span><span style="font-size:0.7rem; font-weight:800; color:#888;">BAR VOOR</span></div>
@@ -108,68 +155,134 @@
         </div>
     </div>
 
-    <!-- VOEDING (NIEUW) -->
-    <div id="v-plan" class="view">
-        <h1>Trip Planner</h1>
-        <span class="sub">Voeding en drinken advies.</span>
+    <!-- NIEUWE SECTIE: VOEDING -->
+    <div id="v-fuel" class="view">
+        <h1>Voeding</h1>
+        <span class="sub">Plan je energie voor de rit.</span>
+        
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Intensiteit</span>
         <div class="switch-container">
-            <div class="btn-opt active" onclick="setPlanMode(this, 'dist')">Afstand (km)</div>
-            <div class="btn-opt" onclick="setPlanMode(this, 'time')">Tijd (uur)</div>
+            <div class="btn-opt active" onclick="setFuelInt(this, 30)">Rustig ☕</div>
+            <div class="btn-opt" onclick="setFuelInt(this, 60)">Stevig 🔥</div>
+            <div class="btn-opt" onclick="setFuelInt(this, 90)">Volgas 🏁</div>
         </div>
+
         <div class="slider-box">
-            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;"><span id="planLabel">Afstand</span> <span><b id="planVal">50</b> <span id="planUnit">km</span></span></div>
-            <input type="range" id="planIn" min="10" max="250" value="50" oninput="updatePlan()">
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">Geplande duur <span><b id="valDur">2.0</b> uur</span></div>
+            <input type="range" id="durIn" min="0.5" max="8" step="0.5" value="2" oninput="updateFuel()">
         </div>
-        <div id="planResults"></div>
+
+        <div style="display:flex; gap:12px; margin-top:20px;">
+            <div class="res-box"><span class="res-val" id="resCarbs">--</span><span style="font-size:0.7rem; font-weight:800; color:#888;">TOTAAL GRAM KH</span></div>
+            <div class="res-box"><span class="res-val" id="resBottles">--</span><span style="font-size:0.7rem; font-weight:800; color:#888;">BIDONS (500ML)</span></div>
+        </div>
+        
+        <div class="card" style="margin-top:20px; font-size:0.85rem; line-height:1.5;">
+            <b>Tip:</b> Probeer elke 20 minuten iets te eten of te drinken om je voorraad op peil te houden.
+        </div>
     </div>
 
-    <!-- WATER & LOG -->
+    <div id="v-water" class="view">
+    <h1>Drinkwater</h1>
+    <span class="sub">Dichtstbijzijnde RIVM drinkwaterpunten.</span>
+
+    <div id="waterLoader" class="card" style="text-align:center;">
+        Punten ophalen... 💧
+    </div>
+
+    <div id="waterList"></div>
+    </div>
+
     <div id="v-log" class="view">
-        <h1>Extra</h1>
-        <span class="sub">Waterpunten en Strava Bericht.</span>
-        <div id="waterList" style="margin-bottom:20px;"></div>
-        <button style="background:var(--strava); color:white; border:none; width:100%; padding:16px; border-radius:16px; font-weight:800; cursor:pointer;" onclick="generateLog()">Genereer Strava Bericht ✨</button>
+        <h1>Weerbericht</h1>
+        <span class="sub">Genereer data voor je Strava of Komoot verslag.</span>
+        
+        <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-sec); display: block; margin-bottom: 8px;">Type Rit</span>
+        <div class="switch-container">
+            <div class="btn-opt active" id="mS" onclick="setLogMode(this, 'single')">Rondje 🔄</div>
+            <div class="btn-opt" id="mR" onclick="setLogMode(this, 'route')">A naar B 🏁</div>
+        </div>
+
+        <input type="text" id="locA" placeholder="Locatie bepalen... 📡">
+        <div id="routeFields" style="display:none;">
+            <input type="text" id="locB" placeholder="Eindlocatie... 📍">
+        </div>
+        
+        <div style="display:flex; gap:10px;">
+            <input type="date" id="dateIn">
+            <input type="time" id="timeIn">
+        </div>
+
+        <button style="background:var(--strava); color:white; border:none; width:100%; padding:16px; border-radius:16px; font-weight:800; margin-top:10px; cursor:pointer;" onclick="generateLog()">Genereer Bericht ✨</button>
+        <div id="logLoader" style="display: none; text-align: center; color: var(--strava); font-weight: bold; margin: 15px 0;">Data ophalen... ☁️</div>
+
         <div id="logResultArea" style="margin-top:20px; display:none;">
-            <div class="card" onclick="copyLog(this)" style="cursor:pointer; border:2px solid #eee;"><span id="res1" style="font-size:0.9rem;"></span></div>
+            <div class="card" onclick="copyLog(this)" style="cursor:pointer; border:2px solid #eee; position:relative; margin-bottom:15px;">
+                <div style="position:absolute; top:-10px; left:10px; background:#eee; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:5px;">KORT ⚡</div>
+                <span id="res1" class="copy-t" style="font-size:0.9rem;"></span>
+            </div>
+            <div class="card" onclick="copyLog(this)" style="cursor:pointer; border:2px solid #eee; position:relative;">
+                <div style="position:absolute; top:-10px; left:10px; background:#eee; font-size:0.6rem; font-weight:900; padding:2px 8px; border-radius:5px;">UITGEBREID 📝</div>
+                <span id="res2" class="copy-t" style="font-size:0.9rem;"></span>
+            </div>
         </div>
     </div>
+
 </div>
 
 <nav>
     <div class="nav-item active" onclick="tab('home')"><i>🏠</i>Overzicht</div>
     <div class="nav-item" onclick="tab('kit')"><i>👕</i>Kleding</div>
     <div class="nav-item" onclick="tab('tire')"><i>🚲</i>Spanning</div>
-    <div class="nav-item" onclick="tab('plan')"><i>🍌</i>Voeding</div>
-    <div class="nav-item" onclick="tab('log')"><i>🌤️</i>Log</div>
+    <div class="nav-item" onclick="tab('fuel')"><i>🔋</i>Voeding</div>
+    <div class="nav-item" onclick="tab('water')"><i>💧</i>Drinkwater</div>
+    <div class="nav-item" onclick="tab('log')"><i>🌤️</i>Weerbericht</div>
 </nav>
 
 <script>
-    let state = { lat: 52.09, lon: 5.12, weather: null, effort: 'med', tireStyle: 1.0, tireSurf: 1.0, planMode: 'dist' };
+   let state = { lat: 52.09, lon: 5.12, weather: null, effort: 'med', tireStyle: 1.0, tireSurf: 1.0, logMode: 'single', fuelInt: 30 };
 
     window.onload = () => {
+        const nu = new Date();
+        document.getElementById('dateIn').valueAsDate = nu;
+        document.getElementById('timeIn').value = nu.getHours().toString().padStart(2, '0') + ":00";
+        
         if(localStorage.getItem('weight')) {
             document.getElementById('weightIn').value = localStorage.getItem('weight');
             document.getElementById('brIn').value = localStorage.getItem('width');
         }
         initApp();
-        updatePlan();
+        updateFuel();
     };
 
-    function tab(id) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('v-'+id).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
     function initApp() {
+        const n = new Date();
+        document.getElementById('greeting').innerText = n.getHours() < 12 ? "Goedemorgen!" : n.getHours() < 18 ? "Goedemiddag!" : "Goedenavond!";
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(p => {
-                state.lat = p.coords.latitude; state.lon = p.coords.longitude;
+                state.lat = p.coords.latitude; state.lon = p.coords.longitude; 
+                fetchWeather();
+                reverseGeocode(p.coords.latitude, p.coords.longitude);
+                loadWaterPoints();
+            }, () => {
                 fetchWeather();
                 loadWaterPoints();
-            }, () => { fetchWeather(); loadWaterPoints(); });
-        } else { fetchWeather(); loadWaterPoints(); }
+            });
+        } else { 
+            fetchWeather();
+            loadWaterPoints();
+        }
+    }
+
+    async function reverseGeocode(lat, lon) {
+        try {
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            const d = await r.json();
+            const name = d.address.city || d.address.town || d.address.village || "Mijn locatie";
+            const el = document.getElementById('locA');
+            el.value = name;
+            document.getElementById('homeLocName').innerText = "📍 " + name;
+        } catch(e) {}
     }
 
     async function fetchWeather() {
@@ -182,99 +295,181 @@
             document.getElementById('homeIcon').innerText = getCondIcon(state.weather.weather_code);
             document.getElementById('homeWind').innerText = Math.round(state.weather.wind_speed_10m);
             document.getElementById('homeDir').innerText = ['N','NO','O','ZO','Z','ZW','W','NW'][Math.round(state.weather.wind_direction_10m/45)%8];
-            document.getElementById('greeting').innerText = new Date().getHours() < 12 ? "Goedemorgen!" : "Goedemiddag!";
-            updateKit(); updateTires(false); updatePlan();
-        } catch(e) { }
+            updateKit(); updateTires(false);
+        } catch(e) { document.getElementById('homeCond').innerText = "Weer niet beschikbaar"; }
     }
 
-    function setEff(el, val) { 
+    function tab(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('v-'+id).classList.add('active');
+        if (event) event.currentTarget.classList.add('active');
+    }
+
+    function toggleBtn(el) {
         el.parentNode.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
-        state.effort = val; 
-        updateKit(); updatePlan();
     }
 
+    function setLogMode(el, mode) {
+        toggleBtn(el);
+        state.logMode = mode;
+        document.getElementById('routeFields').style.display = mode === 'route' ? 'block' : 'none';
+    }
+
+    function setEff(el, val) { toggleBtn(el); state.effort = val; updateKit(); }
+    
     function updateKit() {
         if(!state.weather) return;
         const chillVal = parseInt(document.getElementById('chillIn').value);
         document.getElementById('chillLabel').innerText = ["Bikkel", "Normaal", "Koukleum"][chillVal];
         let finalT = state.weather.apparent_temperature + (state.effort === 'high' ? 5 : 0) - ((chillVal - 1) * 4);
-        let kit = finalT < 7 ? {h:"Winterset", d:"Dik jack + lange broek", e:"❄️"} : finalT < 14 ? {h:"Lange Mouwen", d:"Windjack of jersey", e:"🧥"} : finalT < 20 ? {h:"Kort + Extra", d:"Shirt + armstukken", e:"👕"} : {h:"Zomerkit", d:"Kort / Kort", e:"☀️"};
-        document.getElementById('kitResults').innerHTML = `<div class="card" style="display:flex; align-items:center; gap:15px;"><span style="font-size:2rem;">${kit.e}</span><div><b>${kit.h}</b><br><small>${kit.d}</small></div></div>`;
+        let kit = finalT < 7 ? [{h:"Winterset", d:"Dik jack + lange broek", e:"❄️"}] : finalT < 14 ? [{h:"Lange Mouwen", d:"Windjack of jersey", e:"🧥"}] : finalT < 20 ? [{h:"Kort + Extra", d:"Shirt + armstukken", e:"👕"}] : [{h:"Zomerkit", d:"Kort / Kort", e:"☀️"}];
+        document.getElementById('kitResults').innerHTML = kit.map(k => `<div class="card" style="display:flex; align-items:center; gap:15px;"><span style="font-size:2rem;">${k.e}</span><div><b>${k.h}</b><br><small>${k.d}</small></div></div>`).join('');
     }
 
-    function setTireStyle(el, f) { 
-        el.parentNode.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        state.tireStyle = f; updateTires(true); 
-    }
-
+    function setTireStyle(el, f) { toggleBtn(el); state.tireStyle = f; updateTires(true); }
+    function setTireSurf(el, f) { toggleBtn(el); state.tireSurf = f; updateTires(true); }
+    
     function updateTires(save) {
         const w = parseInt(document.getElementById('weightIn').value), b = parseInt(document.getElementById('brIn').value);
         document.getElementById('valW').innerText = w; document.getElementById('valB').innerText = b;
         if(save) { localStorage.setItem('weight', w); localStorage.setItem('width', b); }
-        let res = ((w / 16) * Math.pow(28 / b, 1.15) * state.tireStyle);
+        let res = ((w / 16) * Math.pow(28 / b, 1.15) * state.tireStyle * state.tireSurf);
         document.getElementById('resA').innerText = Math.max(res, 0.8).toFixed(1);
         document.getElementById('resV').innerText = (Math.max(res, 0.8) * 0.92).toFixed(1);
     }
 
-    function setPlanMode(el, mode) {
-        state.planMode = mode;
-        const input = document.getElementById('planIn');
-        el.parentNode.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        if(mode === 'dist') {
-            input.min = 10; input.max = 250; input.value = 50;
-            document.getElementById('planLabel').innerText = "Afstand"; document.getElementById('planUnit').innerText = "km";
-        } else {
-            input.min = 1; input.max = 10; input.value = 2;
-            document.getElementById('planLabel').innerText = "Duur"; document.getElementById('planUnit').innerText = "uur";
-        }
-        updatePlan();
+    /* NIEUWE FUNCTIES: VOEDING */
+    function setFuelInt(el, val) { toggleBtn(el); state.fuelInt = val; updateFuel(); }
+    function updateFuel() {
+        const dur = parseFloat(document.getElementById('durIn').value);
+        document.getElementById('valDur').innerText = dur.toFixed(1);
+        const totalCarbs = Math.round(dur * state.fuelInt);
+        const bottles = Math.ceil((dur * 500) / 500); // Simpele aanname: 1 bidon per uur
+        document.getElementById('resCarbs').innerText = totalCarbs;
+        document.getElementById('resBottles').innerText = bottles;
     }
 
-    function updatePlan() {
-        const val = parseInt(document.getElementById('planIn').value);
-        document.getElementById('planVal').innerText = val;
-        let hours = state.planMode === 'dist' ? val / 27 : val;
-        let carbPerHour = state.effort === 'high' ? 80 : 50;
-        let totalCarbs = hours * carbPerHour;
-        let totalWater = hours * (state.weather && state.weather.temperature_2m > 20 ? 800 : 600);
+    async function fetchWeatherForLog(loc) {
+        const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(loc)}&count=1&language=nl&format=json`);
+        const gd = await geo.json();
+        if (!gd.results) throw new Error("Locatie niet gevonden: " + loc);
+        const { latitude: lat, longitude: lon } = gd.results[0];
+        const date = document.getElementById('dateIn').value;
+        const time = document.getElementById('timeIn').value;
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&start_date=${date}&end_date=${date}&timezone=auto`);
+        const wd = await res.json();
+        const hour = parseInt(time.split(':')[0]);
+        return {
+            t: Math.round(wd.hourly.temperature_2m[hour]),
+            c: wd.hourly.weather_code[hour],
+            w: Math.round(wd.hourly.wind_speed_10m[hour]),
+            wd: ['N','NO','O','ZO','Z','ZW','W','NW'][Math.round(wd.hourly.wind_direction_10m[hour]/45)%8]
+        };
+    }
 
-        let nKrent = Math.floor((totalCarbs * 0.4) / 30);
-        let rem = totalCarbs - (nKrent * 30);
-        let nReep = Math.floor(rem / 35);
-        let nGel = Math.max(1, Math.ceil((rem - (nReep * 35)) / 25));
+    async function generateLog() {
+        const locAVal = document.getElementById('locA').value;
+        if (!locAVal) return alert("Vul locatie in");
+        const loader = document.getElementById('logLoader');
+        loader.style.display = 'block';
+        document.getElementById('logResultArea').style.display = 'none';
 
-        document.getElementById('planResults').innerHTML = `
-            <div class="card">
-                <div class="fuel-card"><div class="fuel-info">💧 Water</div><div class="fuel-qty">${(totalWater/1000).toFixed(1)}L</div></div>
-                <div class="fuel-card"><div class="fuel-info">🍞 Krentenbollen</div><div class="fuel-qty">${nKrent}x</div></div>
-                <div class="fuel-card"><div class="fuel-info">🍫 Repen</div><div class="fuel-qty">${nReep}x</div></div>
-                <div class="fuel-card"><div class="fuel-icon">🧪 Gels</div><div class="fuel-qty">${nGel}x</div></div>
-            </div>`;
+        try {
+            const wA = await fetchWeatherForLog(locAVal);
+            const windMap = { 'N': 'het noorden', 'NO': 'het noordoosten', 'O': 'het oosten', 'ZO': 'het zuidoosten', 'Z': 'het zuiden', 'ZW': 'het zuidwesten', 'W': 'het westen', 'NW': 'het noordwesten' };
+
+            let r1, r2;
+            if (state.logMode === 'single') {
+                const windDirFull = windMap[wA.wd] || wA.wd;
+                r1 = `${getCondIcon(wA.c)} ${wA.t}°C, ${getCondStr(wA.c).toLowerCase()}. 🌬️ Wind: ${wA.wd} ${wA.w} km/u. #RideReady`;
+                r2 = `📊 Ritverslag: Een ${getCondStr(wA.c).toLowerCase()}e rit bij ${wA.t}°C. Er stond een windje uit ${windDirFull} (${wA.w} km/u). 🚲`;
+            } else {
+                const locBVal = document.getElementById('locB').value;
+                if (!locBVal) throw new Error("Vul eindlocatie in");
+                const wB = await fetchWeatherForLog(locBVal);
+                const windDirFinish = windMap[wB.wd] || wB.wd;
+                r1 = `${getCondIcon(wB.c)} ${locAVal} ➔ ${locBVal} | ${wA.t}°C ➔ ${wB.t}°C. 🌬️ Wind: ${wB.wd} ${wB.w} km/u.`;
+                r2 = `🏁 Van ${locAVal} naar ${locBVal}: Temperatuur liep van ${wA.t}°C naar ${wB.t}°C. Bij aankomst waaide het vanuit ${windDirFinish}. #CyclingLife`;
+            }
+            document.getElementById('res1').innerText = r1;
+            document.getElementById('res2').innerText = r2;
+            document.getElementById('logResultArea').style.display = 'block';
+        } catch(e) { alert(e.message); }
+        loader.style.display = 'none';
     }
 
     function getCondStr(c) { if(c==0) return "Onbewolkt"; if(c<=3) return "Licht bewolkt"; if(c<=67) return "Regenachtig"; return "Bewolkt"; }
     function getCondIcon(c) { if(c==0) return "☀️"; if(c<=3) return "🌤️"; if(c<=67) return "🌧️"; return "☁️"; }
+    function copyLog(el) { navigator.clipboard.writeText(el.querySelector('.copy-t').innerText); el.style.borderColor = "#fc4c02"; setTimeout(()=>el.style.borderColor="#eee", 1000); }
 
     async function loadWaterPoints() {
+        const loader = document.getElementById('waterLoader');
+        const list = document.getElementById('waterList');
         try {
-            const res = await fetch('https://raw.githubusercontent.com/Peterkrijgsman85/cycling/main/drinkwaterpunten-rivm.json');
+            const url = 'https://raw.githubusercontent.com/Peterkrijgsman85/cycling/main/drinkwaterpunten-rivm.json';
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Kon JSON niet ophalen van GitHub");
+            
             const data = await res.json();
-            const points = Array.isArray(data) ? data : (data.features || []);
-            document.getElementById('waterList').innerHTML = `<div class="card">📍 ${points.length > 0 ? 'Waterpunten geladen' : 'Geen waterpunten gevonden'}</div>`;
-        } catch(e) { document.getElementById('waterList').innerHTML = ""; }
+            const pointsArray = Array.isArray(data) ? data : (data.features || []);
+
+            const normalized = pointsArray.map(p => {
+                const item = p.properties ? p.properties : p;
+                const lat = parseFloat(item.lat || item.Latitude || item.latitude || (p.geometry ? p.geometry.coordinates[1] : 0));
+                const lon = parseFloat(item.lon || item.Longitude || item.longitude || (p.geometry ? p.geometry.coordinates[0] : 0));
+                
+                return {
+                    name: item.naam || item.Name || item.locatie || "RIVM Tappunt",
+                    lat: lat,
+                    lon: lon,
+                    distance: calcDistance(state.lat, state.lon, lat, lon)
+                };
+            }).filter(p => p.lat !== 0);
+
+            normalized.sort((a, b) => a.distance - b.distance);
+            const nearest = normalized.slice(0, 15);
+
+            loader.style.display = 'none';
+
+            if (nearest.length === 0) {
+                list.innerHTML = '<div class="card">Geen waterpunten gevonden. 🏜️</div>';
+                return;
+            }
+
+            list.innerHTML = nearest.map(p => `
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                        <div>
+                            <div style="font-weight:800; font-size:1rem;">💧 ${p.name}</div>
+                            <div class="water-distance">${p.distance.toFixed(1)} km afstand</div>
+                            <div class="water-tag">RIVM Drinkwaterpunt</div>
+                        </div>
+                    </div>
+                    <div class="water-actions">
+                        <a class="water-btn" href="https://www.google.com/maps?q=${p.lat},${p.lon}" target="_blank">Open in Maps</a>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch(e) {
+            console.error(e);
+            loader.innerHTML = 'Fout bij laden RIVM data 😕';
+        }
     }
 
-    function generateLog() {
-        if(!state.weather) return;
-        const r1 = `${getCondIcon(state.weather.weather_code)} ${Math.round(state.weather.temperature_2m)}°C. 🌬️ Wind: ${Math.round(state.weather.wind_speed_10m)} km/u. #RideReady`;
-        document.getElementById('res1').innerText = r1;
-        document.getElementById('logResultArea').style.display = 'block';
+    function calcDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
-    function copyLog(el) { navigator.clipboard.writeText(el.innerText); el.style.borderColor = "#fc4c02"; setTimeout(()=>el.style.borderColor="#eee", 1000); }
 </script>
+
 </body>
 </html>
-```[cite: 1]
